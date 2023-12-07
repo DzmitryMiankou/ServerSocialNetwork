@@ -2,12 +2,13 @@ import { Controller, Get, HttpCode, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { AppService } from './app.service';
 
-@Controller(`app`)
+@Controller()
 export class AppController {
   constructor(private appService: AppService) {}
 
   @Get(`test`)
-  testWord(): string {
+  @HttpCode(200)
+  getHello(): string {
     return this.appService.getHello();
   }
 
@@ -15,7 +16,6 @@ export class AppController {
   @HttpCode(200)
   cats(@Req() request: Request): string {
     console.log(request);
-    console.log(process.env.PASSWORD_DB);
     return 'tgt';
   }
 }
