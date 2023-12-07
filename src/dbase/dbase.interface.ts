@@ -1,9 +1,8 @@
-interface ReturnDbaseType {
-  test: string;
+interface UserDataType {
+  id: number;
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
 }
 
-interface ReturnDbaseType2 {
-  test: string;
-}
-
-export { ReturnDbaseType, ReturnDbaseType2 };
+export { UserDataType };

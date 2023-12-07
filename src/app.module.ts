@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { DbaseModule } from './dbase/dbase.module';
+import { UserEntity } from './dbase/entities/user.entity/user.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { DbaseModule } from './dbase/dbase.module';
         username: configService.get(`USERNAME_DB`),
         password: configService.get(`PASSWORD_DB`),
         database: configService.get(`DATABASE_DB`),
-        entities: [],
+        entities: [UserEntity],
         synchronize: true,
       }),
       inject: [ConfigService],
