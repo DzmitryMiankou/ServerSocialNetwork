@@ -15,9 +15,9 @@ export class DbaseService {
   async createUser(user: FormValue<string>): Promise<string> {
     try {
       await this.todoRepositort.save(user);
-      return 'ok_save_userData_in_DB';
+      return 'OK_SAVE';
     } catch (error) {
-      return 'Error_save_userData_in_DB';
+      return `${error.code}`;
     }
   }
 
