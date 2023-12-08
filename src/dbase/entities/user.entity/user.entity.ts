@@ -12,6 +12,9 @@ export class UserEntity {
   lastName: string;
 
   @Column()
+  email: string;
+
+  @Column()
   password: string;
 
   @Column({ default: false })

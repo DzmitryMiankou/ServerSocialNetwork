@@ -5,4 +5,11 @@ interface UserDataType {
   isActive: boolean;
 }
 
-export { UserDataType };
+interface FormValue<T extends string> {
+  firstName: T;
+  lastName: T;
+  password: T;
+  email: T;
+}
+
+export { UserDataType, FormValue };
