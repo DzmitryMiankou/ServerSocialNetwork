@@ -27,7 +27,6 @@ export class DbaseController {
     const answerDB = await this.dbService.findOneByActiveId(
       id.replace(`:`, ''),
     );
-    console.log(answerDB);
     if (answerDB === null)
       return response.status(200).json([{ str: 'not user' }]);
     await this.dbService.activeUser(answerDB.id);
