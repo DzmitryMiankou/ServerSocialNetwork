@@ -19,4 +19,7 @@ export class UserEntity {
 
   @Column({ default: false })
   isActive: boolean;
+
+  @Column()
+  activeId: string;
 }

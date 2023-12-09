@@ -5,6 +5,7 @@ interface UserDataType {
   password: string;
   email: string;
   isActive: boolean;
+  activeId: string;
 }
 
 interface FormValue<T extends string> {
