@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Res,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DbaseService } from './dbase.service';
 import { UserDataType } from './dbase.interface';
-import { FormValue } from './dbase.interface';
 import { Response } from 'express';
+import { UserEntity } from './entities/user.entity/user.entity';
 
 @Controller('app')
 export class DbaseController {
@@ -14,10 +23,8 @@ export class DbaseController {
   }
 
   @Post(`reg_user`)
-  async setUserData(
-    @Body() data: FormValue<string>,
-    @Res() response: Response,
-  ) {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async setUserData(@Body() data: UserEntity, @Res() response: Response) {
     const answerDB = await this.dbService.createUser(data);
     return response.status(answerDB === 'OK_SAVE' ? 200 : 400).json(answerDB);
   }
