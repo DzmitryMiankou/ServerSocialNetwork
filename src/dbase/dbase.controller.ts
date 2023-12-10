@@ -4,18 +4,23 @@ import {
   Get,
   Param,
   Post,
+  Render,
   Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { DbaseService } from './dbase.service';
-import { UserDataType } from './dbase.interface';
+import { UserDataType, RenderDataeActivateEmail } from './dbase.interface';
 import { Response } from 'express';
 import { UserEntity } from './entities/user.entity/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('app')
 export class DbaseController {
-  constructor(private dbService: DbaseService) {}
+  constructor(
+    private dbService: DbaseService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get(`users`)
   getUsers(): Promise<UserDataType[]> {
@@ -30,13 +35,29 @@ export class DbaseController {
   }
 
   @Get(`user/:activate`)
-  async activate(@Param('activate') id: string, @Res() response: Response) {
+  @Render('emailGoodPage')
+  async activate(
+    @Param('activate') id: string,
+  ): Promise<RenderDataeActivateEmail<string>> {
     const answerDB = await this.dbService.findOneByActiveId(
       id.replace(`:`, ''),
     );
+
     if (answerDB === null)
-      return response.status(200).json([{ str: 'not user' }]);
+      return {
+        body: 'User is not found',
+        url: this.configService.get(`CORS_ADRES`),
+        a_text: 'click to registration account',
+        style:
+          this.configService.get(`SERVER_ADRES`) + 'dist/public/css/style.css',
+      };
     await this.dbService.activeUser(answerDB.id);
-    return response.status(200).json(answerDB);
+    return {
+      body: 'Thank you!',
+      url: this.configService.get(`CORS_ADRES`),
+      a_text: 'click to login account',
+      style:
+        this.configService.get(`SERVER_ADRES`) + '/dist/public/css/style.css',
+    };
   }
 }

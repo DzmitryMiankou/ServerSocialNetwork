@@ -15,4 +15,11 @@ interface FormValue<T extends string> {
   email: T;
 }
 
-export { UserDataType, FormValue };
+interface RenderDataeActivateEmail<T extends string> {
+  body: T;
+  url: T;
+  a_text: T;
+  style: T;
+}
+
+export { UserDataType, FormValue, RenderDataeActivateEmail };
