@@ -22,7 +22,7 @@ export class DbaseService {
     try {
       const hash = await bcrypt.hash(
         user.password,
-        +this.configService.get(`SALT`),
+        +this.configService.get<number>(`SALT`),
       );
 
       const activeURL = uuidv4();
@@ -39,7 +39,7 @@ export class DbaseService {
         template: './welcome',
         context: {
           name: user.firstName,
-          url: this.configService.get(`ISACTIVE_HREF`) + activeURL,
+          url: this.configService.get<string>(`ISACTIVE_HREF`) + activeURL,
         },
       });
 

@@ -8,7 +8,10 @@ export class LoginController {
 
   @Get(`login`)
   async loginUsers(@Res() response: Response) {
-    const dsg = await this.loginService.login('gmiankou@gmail.com');
+    const dsg = await this.loginService.login({
+      email: 'gmiankou@gmail.com',
+      password: 'miankou14121994A',
+    });
     return response.status(200).json(dsg);
   }
 }

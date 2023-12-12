@@ -21,11 +21,11 @@ import { LoginEntity } from './login/entities/login.entity/login.entity';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get(`HOST_DB`),
-        port: +configService.get(`PORT_DB`),
-        username: configService.get(`USERNAME_DB`),
-        password: configService.get(`PASSWORD_DB`),
-        database: configService.get(`DATABASE_DB`),
+        host: configService.get<string>(`HOST_DB`),
+        port: +configService.get<number>(`PORT_DB`),
+        username: configService.get<string>(`USERNAME_DB`),
+        password: configService.get<string>(`PASSWORD_DB`),
+        database: configService.get<string>(`DATABASE_DB`),
         entities: [UserEntity, LoginEntity],
         synchronize: true,
       }),
@@ -35,17 +35,17 @@ import { LoginEntity } from './login/entities/login.entity/login.entity';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: configService.get(`MAIL_HOST`),
-          port: +configService.get(`MAIL_PORT`),
+          host: configService.get<string>(`MAIL_HOST`),
+          port: +configService.get<number>(`MAIL_PORT`),
           ignoreTLS: false,
           secure: false,
           auth: {
-            user: configService.get(`MAIL_USER`),
-            pass: configService.get(`MAIL_PASSWORD`),
+            user: configService.get<string>(`MAIL_USER`),
+            pass: configService.get<string>(`MAIL_PASSWORD`),
           },
         },
         defaults: {
-          from: `"No Reply" <${configService.get(`MAIL_FROM`)}>`,
+          from: `"No Reply" <${configService.get<string>(`MAIL_FROM`)}>`,
         },
         preview: true,
         template: {

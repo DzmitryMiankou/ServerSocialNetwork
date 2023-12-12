@@ -46,18 +46,20 @@ export class DbaseController {
     if (answerDB === null)
       return {
         body: 'User is not found',
-        url: this.configService.get(`CORS_ADRES`),
+        url: this.configService.get<string>(`CORS_ADRES`),
         a_text: 'click to registration account',
         style:
-          this.configService.get(`SERVER_ADRES`) + 'dist/public/css/style.css',
+          this.configService.get<string>(`SERVER_ADRES`) +
+          'dist/public/css/style.css',
       };
     await this.dbService.activeUser(answerDB.id);
     return {
       body: 'Thank you!',
-      url: this.configService.get(`CORS_ADRES`),
+      url: this.configService.get<string>(`CORS_ADRES`),
       a_text: 'click to login account',
       style:
-        this.configService.get(`SERVER_ADRES`) + '/dist/public/css/style.css',
+        this.configService.get<string>(`SERVER_ADRES`) +
+        '/dist/public/css/style.css',
     };
   }
 }

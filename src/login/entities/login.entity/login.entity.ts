@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { UserEntity } from 'src/dbase/entities/user.entity/user.entity';
 
 @Entity()
 export class LoginEntity {
@@ -7,4 +14,11 @@ export class LoginEntity {
 
   @Column()
   refreshToken: string;
+
+  @Column()
+  userId: number;
+
+  @OneToOne(() => UserEntity)
+  @JoinColumn()
+  user: UserEntity[];
 }

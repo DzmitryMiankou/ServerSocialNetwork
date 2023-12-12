@@ -1,12 +1,5 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IsEmail, IsString, MinLength } from 'class-validator';
-import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
 
 @Entity()
 export class UserEntity {
@@ -37,8 +30,4 @@ export class UserEntity {
 
   @Column()
   activeId: string;
-
-  @OneToOne(() => LoginEntity)
-  @JoinColumn()
-  loginid: LoginEntity;
 }
