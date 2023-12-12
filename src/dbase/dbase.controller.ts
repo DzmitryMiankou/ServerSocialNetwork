@@ -60,10 +60,4 @@ export class DbaseController {
         this.configService.get(`SERVER_ADRES`) + '/dist/public/css/style.css',
     };
   }
-
-  @Get(`login`)
-  async loginUsers(@Res() response: Response) {
-    const dsg = await this.dbService.login('gmiaxnkou@gmail.com');
-    return response.status(200).json(dsg);
-  }
 }

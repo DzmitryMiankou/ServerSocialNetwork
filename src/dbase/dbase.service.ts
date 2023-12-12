@@ -66,10 +66,4 @@ export class DbaseService {
   findAll(): Promise<UserDataType[]> {
     return this.todoRepositort.find();
   }
-
-  async login(email: string) {
-    const user = await this.todoRepositort.findOneBy({ email: email });
-    if (user === null) return { code: 401, message: 'Not user' };
-    return user;
-  }
 }

@@ -9,6 +9,8 @@ import { UserEntity } from './dbase/entities/user.entity/user.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { LoginModule } from './login/login.module';
+import { LoginEntity } from './login/entities/login.entity/login.entity';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { join } from 'path';
         username: configService.get(`USERNAME_DB`),
         password: configService.get(`PASSWORD_DB`),
         database: configService.get(`DATABASE_DB`),
-        entities: [UserEntity],
+        entities: [UserEntity, LoginEntity],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -57,6 +59,7 @@ import { join } from 'path';
       inject: [ConfigService],
     }),
     DbaseModule,
+    LoginModule,
   ],
   controllers: [AppController],
   providers: [AppService],
