@@ -30,13 +30,13 @@ export class LoginService {
       const isMatch = await bcrypt.compare(password, user?.password);
       if (!isMatch) return { code: 401, message: 'Not password' };
 
-      const payload = { sub: user.id, username: user.firstName };
+      const payload = { sub: user?.id, username: user?.firstName };
 
       await this.loginRepository.save({
         refreshToken: await this.jwtService.signAsync(payload, {
           expiresIn: '30d',
         }),
-        userId: user.id,
+        userId: user?.id,
       });
 
       return user;
