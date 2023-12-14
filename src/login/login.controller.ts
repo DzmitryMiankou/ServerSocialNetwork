@@ -1,4 +1,4 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { Response } from 'express';
 
@@ -6,11 +6,14 @@ import { Response } from 'express';
 export class LoginController {
   constructor(private loginService: LoginService) {}
 
-  @Get(`login`)
-  async loginUsers(@Res() response: Response) {
+  @Post(`login`)
+  async loginUsers(
+    @Body() user: { email: string; password: string },
+    @Res() response: Response,
+  ) {
     const dsg = await this.loginService.login({
-      email: 'gmiankou@gmail.com',
-      password: 'miankou14121994A',
+      email: user?.email,
+      password: user?.password,
     });
     return response.status(200).json(dsg);
   }
