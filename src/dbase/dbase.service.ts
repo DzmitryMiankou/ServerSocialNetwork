@@ -8,12 +8,15 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
+import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class DbaseService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly todoRepositort: Repository<UserEntity>,
+    private jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailServise: MailerService,
   ) {}
@@ -21,24 +24,37 @@ export class DbaseService {
   async createUser(user: FormValue<string>): Promise<string> {
     try {
       const hash = await bcrypt.hash(
-        user.password,
+        user?.password,
         +this.configService.get<number>(`SALT`),
       );
 
+      const payload = { username: user?.firstName };
       const activeURL = uuidv4();
 
-      await this.todoRepositort.save({
-        ...user,
-        password: hash,
-        activeId: activeURL,
+      const newUser = new UserEntity();
+
+      newUser.activeId = activeURL;
+      newUser.password = hash;
+      newUser.firstName = user?.firstName;
+      newUser.lastName = user?.lastName;
+      newUser.email = user?.email;
+
+      await this.todoRepositort.manager.save(newUser);
+
+      const login = new LoginEntity();
+      login.refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '30d',
       });
+      login.userId = newUser.id;
+
+      await this.todoRepositort.manager.save(login);
 
       await this.mailServise.sendMail({
-        to: user.email,
+        to: user?.email,
         subject: 'Welcome to my website',
         template: './welcome',
         context: {
-          name: user.firstName,
+          name: user?.firstName,
           url: this.configService.get<string>(`ISACTIVE_HREF`) + activeURL,
         },
       });

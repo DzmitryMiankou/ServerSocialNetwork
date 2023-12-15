@@ -22,7 +22,15 @@ export class LoginService {
   }: {
     email: string;
     password: string;
-  }): Promise<UserEntity | { code: number; message: string }> {
+  }): Promise<
+    | {
+        id: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+      }
+    | { code: number; message: string }
+  > {
     try {
       const user = await this.userRepositorty.findOneBy({ email: email });
       if (user === null) return { code: 401, message: 'Not user' };
@@ -32,16 +40,24 @@ export class LoginService {
 
       const payload = { sub: user?.id, username: user?.firstName };
 
-      await this.loginRepository.save({
-        refreshToken: await this.jwtService.signAsync(payload, {
-          expiresIn: '30d',
-        }),
-        userId: user?.id,
-      });
+      await this.loginRepository
+        .createQueryBuilder()
+        .update(`login_entity`)
+        .set({
+          refreshToken: await this.jwtService.signAsync(payload, {
+            expiresIn: '30d',
+          }),
+        })
+        .where('userId = :userId', { userId: user?.id })
+        .execute();
 
-      return user;
+      return {
+        id: user?.id,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+      };
     } catch (error) {
-      console.log(error);
       return { code: 401, message: error.sqlMessage };
     }
   }
