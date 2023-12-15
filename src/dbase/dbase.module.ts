@@ -14,8 +14,8 @@ import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         global: true,
-        secret: configService.get<string>(`SECRET_ACCESS_KEY`),
-        signOptions: { expiresIn: '60s' },
+        secret: configService.get<string>(`SECRET_REFRESH_KEY`),
+        signOptions: { expiresIn: '30d' },
       }),
       inject: [ConfigService],
     }),

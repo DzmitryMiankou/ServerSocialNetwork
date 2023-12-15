@@ -6,6 +6,14 @@ import { UserEntity } from 'src/dbase/entities/user.entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
+interface LoginType {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  access_token: string;
+}
+
 @Injectable()
 export class LoginService {
   constructor(
@@ -22,15 +30,7 @@ export class LoginService {
   }: {
     email: string;
     password: string;
-  }): Promise<
-    | {
-        id: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-      }
-    | { code: number; message: string }
-  > {
+  }): Promise<LoginType | { code: number; message: string }> {
     try {
       const user = await this.userRepositorty.findOneBy({ email: email });
       if (user === null) return { code: 401, message: 'Not user' };
@@ -56,6 +56,9 @@ export class LoginService {
         firstName: user?.firstName,
         lastName: user?.lastName,
         email: user?.email,
+        access_token: await this.jwtService.signAsync(payload, {
+          expiresIn: '10m',
+        }),
       };
     } catch (error) {
       return { code: 401, message: error.sqlMessage };
