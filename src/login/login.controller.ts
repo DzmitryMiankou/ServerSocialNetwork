@@ -21,6 +21,8 @@ export class LoginController {
   @Get(`allUsers/:users`)
   async searchUsers(@Param(`users`) user: string, @Res() response: Response) {
     const users = await this.loginService.searchUsers(user.replace(`:`, ''));
+    if (user.replace(`:`, '') === '')
+      return response.status(200).json(undefined);
     return response.status(200).json(users);
   }
 }
