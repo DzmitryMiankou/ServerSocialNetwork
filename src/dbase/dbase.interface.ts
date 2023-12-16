@@ -1,13 +1,3 @@
-interface UserDataType {
-  id: number;
-  firstName: string;
-  lastName: string;
-  password: string;
-  email: string;
-  isActive: boolean;
-  activeId: string;
-}
-
 interface FormValue<T extends string> {
   firstName: T;
   lastName: T;
@@ -22,4 +12,4 @@ interface RenderDataeActivateEmail<T extends string> {
   style: T;
 }
 
-export { UserDataType, FormValue, RenderDataeActivateEmail };
+export { FormValue, RenderDataeActivateEmail };

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, Get, Param } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { Response } from 'express';
 
@@ -11,10 +11,16 @@ export class LoginController {
     @Body() user: { email: string; password: string },
     @Res() response: Response,
   ) {
-    const dsg = await this.loginService.login({
+    const login = await this.loginService.login({
       email: user?.email,
       password: user?.password,
     });
-    return response.status(200).json(dsg);
+    return response.status(200).json(login);
+  }
+
+  @Get(`allUsers/:users`)
+  async searchUsers(@Param(`users`) user: string, @Res() response: Response) {
+    const users = await this.loginService.searchUsers(user.replace(`:`, ''));
+    return response.status(200).json(users);
   }
 }

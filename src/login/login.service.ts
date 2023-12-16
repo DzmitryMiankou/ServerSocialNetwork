@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginEntity } from './entities/login.entity/login.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { UserEntity } from 'src/dbase/entities/user.entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-
-interface LoginType {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  access_token: string;
-}
+import {
+  UserData,
+  UserPprivateData,
+} from 'src/interfaces/user-interface/user-interface';
 
 @Injectable()
 export class LoginService {
@@ -30,7 +26,7 @@ export class LoginService {
   }: {
     email: string;
     password: string;
-  }): Promise<LoginType | { code: number; message: string }> {
+  }): Promise<UserPprivateData | { code: number; message: string }> {
     try {
       const user = await this.userRepositorty.findOneBy({ email: email });
       if (user === null) return { code: 401, message: 'Not user' };
@@ -60,6 +56,27 @@ export class LoginService {
           expiresIn: '10m',
         }),
       };
+    } catch (error) {
+      return { code: 401, message: error.sqlMessage };
+    }
+  }
+
+  async searchUsers(
+    str: string,
+  ): Promise<UserData[] | { code: number; message: string }> {
+    try {
+      const loadedPosts = await this.userRepositorty.find({
+        select: [`id`, `firstName`, `lastName`],
+        where: [
+          {
+            firstName: Like(`%${str}%`),
+          },
+          {
+            lastName: Like(`%${str}%`),
+          },
+        ],
+      });
+      return loadedPosts;
     } catch (error) {
       return { code: 401, message: error.sqlMessage };
     }

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UserDataType } from './dbase.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity/user.entity';
 import { Repository } from 'typeorm';
@@ -66,8 +65,11 @@ export class DbaseService {
     }
   }
 
-  findOneByActiveId(id: string): Promise<UserDataType> {
-    return this.todoRepositort.findOneBy({ activeId: id });
+  findOneByActiveId(id: string): Promise<{ id: number }> {
+    return this.todoRepositort.findOne({
+      where: { activeId: id },
+      select: ['id'],
+    });
   }
 
   async activeUser(id: number) {
@@ -77,9 +79,5 @@ export class DbaseService {
       .set({ isActive: true })
       .where('id = :id', { id: id })
       .execute();
-  }
-
-  findAll(): Promise<UserDataType[]> {
-    return this.todoRepositort.find();
   }
 }

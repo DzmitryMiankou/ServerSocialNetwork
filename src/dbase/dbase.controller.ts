@@ -10,7 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { DbaseService } from './dbase.service';
-import { UserDataType, RenderDataeActivateEmail } from './dbase.interface';
+import { RenderDataeActivateEmail } from './dbase.interface';
 import { Response } from 'express';
 import { UserEntity } from './entities/user.entity/user.entity';
 import { ConfigService } from '@nestjs/config';
@@ -21,11 +21,6 @@ export class DbaseController {
     private dbService: DbaseService,
     private readonly configService: ConfigService,
   ) {}
-
-  @Get(`users`)
-  getUsers(): Promise<UserDataType[]> {
-    return this.dbService.findAll();
-  }
 
   @Post(`reg_user`)
   @UsePipes(new ValidationPipe({ transform: true }))
