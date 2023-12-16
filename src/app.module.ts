@@ -11,6 +11,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { LoginModule } from './login/login.module';
 import { LoginEntity } from './login/entities/login.entity/login.entity';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { LoginEntity } from './login/entities/login.entity/login.entity';
     }),
     DbaseModule,
     LoginModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
