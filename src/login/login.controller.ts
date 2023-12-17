@@ -22,7 +22,7 @@ export class LoginController {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
+          maxAge: 600000,
         })
         .json(data);
 

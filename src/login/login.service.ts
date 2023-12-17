@@ -68,12 +68,8 @@ export class LoginService {
       const loadedPosts = await this.userRepositorty.find({
         select: [`id`, `firstName`, `lastName`],
         where: [
-          {
-            firstName: Like(`%${str}%`),
-          },
-          {
-            lastName: Like(`%${str}%`),
-          },
+          { isActive: true, firstName: Like(`%${str}%`) },
+          { isActive: true, lastName: Like(`%${str}%`) },
         ],
       });
       return loadedPosts;

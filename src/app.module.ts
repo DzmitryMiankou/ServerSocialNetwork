@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DataSource } from 'typeorm';
 import { DbaseModule } from './dbase/dbase.module';
 import { UserEntity } from './dbase/entities/user.entity/user.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -12,6 +11,7 @@ import { join } from 'path';
 import { LoginModule } from './login/login.module';
 import { LoginEntity } from './login/entities/login.entity/login.entity';
 import { GatewayModule } from './gateway/gateway.module';
+import { AuthMiddleware } from './middleware/auth/auth.middleware';
 
 @Module({
   imports: [
@@ -66,6 +66,8 @@ import { GatewayModule } from './gateway/gateway.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('app/login');
+  }
 }
