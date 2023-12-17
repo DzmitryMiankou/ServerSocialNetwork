@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
     try {
       const req = context.switchToHttp().getRequest();
       const token = req.cookies.refresh_token;
-
+      console.log(req.headers.authorization);
       if (!token) throw new UnauthorizedException();
       req.user = this.JWT.verify(token, {
         secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),

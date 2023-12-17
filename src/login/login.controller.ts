@@ -39,7 +39,7 @@ export class LoginController {
         .json({ ...resData });
     }
 
-    return response.status(401).json(data);
+    return response.status(400).json(data);
   }
 
   @UseGuards(AuthGuard)
