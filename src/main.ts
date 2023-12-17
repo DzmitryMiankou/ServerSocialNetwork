@@ -9,7 +9,10 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-  app.enableCors({ origin: configService.get(`CORS_ADRES`) });
+  app.enableCors({
+    credentials: true,
+    origin: configService.get(`CORS_ADRES`),
+  });
   app.useStaticAssets(join(__dirname, '..', 'dist/public'));
   app.setBaseViewsDir(join(__dirname, '..', 'dist/views'));
   app.setViewEngine('hbs');

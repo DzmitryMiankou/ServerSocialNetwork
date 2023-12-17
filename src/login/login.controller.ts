@@ -11,11 +11,22 @@ export class LoginController {
     @Body() user: { email: string; password: string },
     @Res() response: Response,
   ) {
-    const login = await this.loginService.login({
+    const data = await this.loginService.login({
       email: user?.email,
       password: user?.password,
     });
-    return response.status(200).json(login);
+
+    if (`access_token` in data)
+      return response
+        .cookie('access_token', data.access_token, {
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax',
+          expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
+        })
+        .json(data);
+
+    return response.status(401).json(data);
   }
 
   @Get(`allUsers/:users`)
