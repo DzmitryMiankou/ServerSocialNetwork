@@ -7,4 +7,5 @@ export interface UserData {
 export interface UserPprivateData extends UserData {
   email: string;
   access_token: string;
+  refresh_token: string;
 }

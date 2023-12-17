@@ -9,6 +9,7 @@ import {
   UserData,
   UserPprivateData,
 } from 'src/interfaces/user-interface/user-interface';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class LoginService {
@@ -18,6 +19,7 @@ export class LoginService {
     @InjectRepository(UserEntity)
     private readonly userRepositorty: Repository<UserEntity>,
     private jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async login({
@@ -36,13 +38,16 @@ export class LoginService {
 
       const payload = { sub: user?.id, username: user?.firstName };
 
+      const refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '30d',
+        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+      });
+
       await this.loginRepository
         .createQueryBuilder()
         .update(`login_entity`)
         .set({
-          refreshToken: await this.jwtService.signAsync(payload, {
-            expiresIn: '30d',
-          }),
+          refreshToken: refreshToken,
         })
         .where('userId = :userId', { userId: user?.id })
         .execute();
@@ -55,6 +60,7 @@ export class LoginService {
         access_token: await this.jwtService.signAsync(payload, {
           expiresIn: '10m',
         }),
+        refresh_token: refreshToken,
       };
     } catch (error) {
       return { code: 401, message: error.sqlMessage };
@@ -73,6 +79,32 @@ export class LoginService {
         ],
       });
       return loadedPosts;
+    } catch (error) {
+      return { code: 401, message: error.sqlMessage };
+    }
+  }
+
+  async updateRefreshToken(token: string) {
+    try {
+      /* const user = this.jwtService.verify(token, {
+        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+      });
+
+      console.log(user);*/
+      /*const loadedPosts = await this.loginRepository.find({
+        select: [`refreshToken`],
+        where: [{ id: 1 }],
+      });*/
+      /* await this.loginRepository
+        .createQueryBuilder()
+        .update(`login_entity`)
+        .set({
+          refreshToken: await this.jwtService.signAsync(payload, {
+            expiresIn: '30d',
+          }),
+        })
+        .where('userId = :userId', { userId: user?.id })
+        .execute();*/
     } catch (error) {
       return { code: 401, message: error.sqlMessage };
     }

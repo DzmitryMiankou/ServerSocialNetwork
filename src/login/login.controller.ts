@@ -1,6 +1,16 @@
-import { Body, Controller, Post, Res, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Get,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { LoginService } from './login.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
 
 @Controller('app')
 export class LoginController {
@@ -16,24 +26,33 @@ export class LoginController {
       password: user?.password,
     });
 
-    if (`access_token` in data)
+    if (`refresh_token` in data) {
+      const resData = { ...data };
+      delete resData['refresh_token'];
       return response
-        .cookie('access_token', data.access_token, {
+        .cookie('refresh_token', data.refresh_token, {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 600000,
+          maxAge: 2592000000,
         })
-        .json(data);
+        .json({ ...resData });
+    }
 
     return response.status(401).json(data);
   }
 
+  @UseGuards(AuthGuard)
   @Get(`allUsers/:users`)
   async searchUsers(@Param(`users`) user: string, @Res() response: Response) {
     const users = await this.loginService.searchUsers(user.replace(`:`, ''));
     if (user.replace(`:`, '') === '')
       return response.status(200).json(undefined);
     return response.status(200).json(users);
+  }
+
+  @Get(`refreshToken`)
+  async refreshToken(@Req() request: Request) {
+    this.loginService.updateRefreshToken(request.cookies.refresh_token);
   }
 }
