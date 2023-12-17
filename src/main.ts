@@ -11,13 +11,13 @@ async function bootstrap() {
   const configService = app.get<ConfigService>(ConfigService);
   app.enableCors({
     credentials: true,
-    origin: configService.get(`CORS_ADRES`),
+    origin: configService.get<string>(`CORS_ADRES`),
   });
   app.useStaticAssets(join(__dirname, '..', 'dist/public'));
   app.setBaseViewsDir(join(__dirname, '..', 'dist/views'));
   app.setViewEngine('hbs');
   app.use(cookieParser());
-  await app.listen(configService.get(`PORT_SERVER`));
+  await app.listen(+configService.get<number>(`PORT_SERVER`));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
