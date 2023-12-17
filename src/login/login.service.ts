@@ -86,11 +86,11 @@ export class LoginService {
 
   async updateRefreshToken(token: string) {
     try {
-      /* const user = this.jwtService.verify(token, {
+      const user = this.jwtService.verify(token, {
         secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
       });
 
-      console.log(user);*/
+      console.log(user);
       /*const loadedPosts = await this.loginRepository.find({
         select: [`refreshToken`],
         where: [{ id: 1 }],
