@@ -19,16 +19,20 @@ export class AuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     try {
       const req = context.switchToHttp().getRequest();
-      const token = req.cookies.refresh_token;
-      console.log(req.headers.authorization);
-      if (!token) throw new UnauthorizedException();
-      req.user = this.JWT.verify(token, {
-        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+      const refresh_token = req.cookies.refresh_token as string;
+      const access_token = req.headers.authorization.replace(
+        'Bearer',
+        '',
+      ) as string;
+
+      if (!access_token && !refresh_token) throw new UnauthorizedException();
+
+      req.user = this.JWT.verify(access_token, {
+        secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
       return true;
     } catch (error) {
-      console.log(error);
       throw new UnauthorizedException();
     }
   }

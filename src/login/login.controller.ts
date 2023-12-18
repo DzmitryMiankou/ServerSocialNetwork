@@ -7,6 +7,7 @@ import {
   Param,
   Req,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { Response, Request } from 'express';
@@ -39,7 +40,7 @@ export class LoginController {
         .json({ ...resData });
     }
 
-    return response.status(400).json(data);
+    throw new BadRequestException(data);
   }
 
   @UseGuards(AuthGuard)
@@ -52,7 +53,10 @@ export class LoginController {
   }
 
   @Get(`refreshToken`)
-  async refreshToken(@Req() request: Request) {
-    this.loginService.updateRefreshToken(request.cookies.refresh_token);
+  async refreshToken(@Req() request: Request, @Res() response: Response) {
+    const newToken = await this.loginService.updateRefreshToken(
+      request.cookies.refresh_token,
+    );
+    return response.status(201).json({ access_token: newToken });
   }
 }

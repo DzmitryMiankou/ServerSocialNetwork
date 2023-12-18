@@ -13,7 +13,6 @@ import { RenderDataeActivateEmail } from './dbase.interface';
 import { Response } from 'express';
 import { User } from './authentication.entity';
 import { ConfigService } from '@nestjs/config';
-
 import { AuthenticationService } from './authentication.service';
 
 @Controller('app')

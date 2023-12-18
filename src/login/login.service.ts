@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginEntity } from './entities/login.entity/login.entity';
 import { Like, Repository } from 'typeorm';
@@ -28,13 +32,13 @@ export class LoginService {
   }: {
     email: string;
     password: string;
-  }): Promise<UserPprivateData | { code: number; message: string }> {
+  }): Promise<UserPprivateData> {
     try {
       const user = await this.userRepositorty.findOneBy({ email: email });
-      if (user === null) return { code: 401, message: 'Not user' };
-      if (!user?.isActive) return { code: 401, message: 'Not active email' };
+      if (user === null) throw new BadRequestException('Not user');
+      if (!user?.isActive) throw new BadRequestException('Not active email');
       const isMatch = await bcrypt.compare(password, user?.password);
-      if (!isMatch) return { code: 401, message: 'Not password' };
+      if (!isMatch) throw new BadRequestException('Not password');
 
       const payload = { sub: user?.id, username: user?.firstName };
 
@@ -52,24 +56,25 @@ export class LoginService {
         .where('userId = :userId', { userId: user?.id })
         .execute();
 
+      const accessToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '10m',
+        secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
+      });
+
       return {
         id: user?.id,
         firstName: user?.firstName,
         lastName: user?.lastName,
         email: user?.email,
-        access_token: await this.jwtService.signAsync(payload, {
-          expiresIn: '10m',
-        }),
+        access_token: accessToken,
         refresh_token: refreshToken,
       };
     } catch (error) {
-      return { code: 401, message: error.sqlMessage };
+      throw new BadRequestException(error.sqlMessage);
     }
   }
 
-  async searchUsers(
-    str: string,
-  ): Promise<UserData[] | { code: number; message: string }> {
+  async searchUsers(str: string): Promise<UserData[]> {
     try {
       const loadedPosts = await this.userRepositorty.find({
         select: [`id`, `firstName`, `lastName`],
@@ -80,17 +85,25 @@ export class LoginService {
       });
       return loadedPosts;
     } catch (error) {
-      return { code: 401, message: error.sqlMessage };
+      throw new BadRequestException(error.sqlMessage);
     }
   }
 
-  async updateRefreshToken(token: string) {
+  async updateRefreshToken(token: string): Promise<string> {
     try {
       const user = this.jwtService.verify(token, {
         secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
       });
 
-      console.log(user);
+      const accessToken = await this.jwtService.signAsync(
+        { sub: user?.sub, username: user?.username },
+        {
+          expiresIn: '10m',
+          secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
+        },
+      );
+
+      return accessToken;
       /*const loadedPosts = await this.loginRepository.find({
         select: [`refreshToken`],
         where: [{ id: 1 }],
@@ -106,7 +119,7 @@ export class LoginService {
         .where('userId = :userId', { userId: user?.id })
         .execute();*/
     } catch (error) {
-      return { code: 401, message: error.sqlMessage };
+      throw new UnauthorizedException();
     }
   }
 }
