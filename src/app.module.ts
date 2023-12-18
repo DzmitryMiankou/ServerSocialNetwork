@@ -8,8 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DbaseModule } from './dbase/dbase.module';
-import { UserEntity } from './dbase/entities/user.entity/user.entity';
+import { User } from './authentication/authentication.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
@@ -17,6 +16,7 @@ import { LoginModule } from './login/login.module';
 import { LoginEntity } from './login/entities/login.entity/login.entity';
 import { GatewayModule } from './gateway/gateway.module';
 import { AuthMiddleware } from './middleware/auth/auth.middleware';
+import { AuthenticationModule } from './authentication/authentication.module';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { AuthMiddleware } from './middleware/auth/auth.middleware';
         username: configService.get<string>(`USERNAME_DB`),
         password: configService.get<string>(`PASSWORD_DB`),
         database: configService.get<string>(`DATABASE_DB`),
-        entities: [UserEntity, LoginEntity],
+        entities: [User, LoginEntity],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -64,9 +64,9 @@ import { AuthMiddleware } from './middleware/auth/auth.middleware';
       }),
       inject: [ConfigService],
     }),
-    DbaseModule,
     LoginModule,
     GatewayModule,
+    AuthenticationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

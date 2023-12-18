@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from 'src/dbase/entities/user.entity/user.entity';
+import { User } from 'src/authentication/authentication.entity';
 
 @Entity()
 export class LoginEntity {
@@ -18,7 +18,7 @@ export class LoginEntity {
   @Column()
   userId: number;
 
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => User)
   @JoinColumn()
-  user: UserEntity[];
+  user: User[];
 }

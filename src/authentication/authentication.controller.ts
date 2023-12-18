@@ -9,22 +9,23 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { DbaseService } from './dbase.service';
 import { RenderDataeActivateEmail } from './dbase.interface';
 import { Response } from 'express';
-import { UserEntity } from './entities/user.entity/user.entity';
+import { User } from './authentication.entity';
 import { ConfigService } from '@nestjs/config';
 
+import { AuthenticationService } from './authentication.service';
+
 @Controller('app')
-export class DbaseController {
+export class AuthenticationController {
   constructor(
-    private dbService: DbaseService,
+    private dbService: AuthenticationService,
     private readonly configService: ConfigService,
   ) {}
 
   @Post(`reg_user`)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async setUserData(@Body() data: UserEntity, @Res() response: Response) {
+  async setUserData(@Body() data: User, @Res() response: Response) {
     const answerDB = await this.dbService.createUser(data);
     return response.status(answerDB === 'OK_SAVE' ? 200 : 400).json(answerDB);
   }

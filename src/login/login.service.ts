@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginEntity } from './entities/login.entity/login.entity';
 import { Like, Repository } from 'typeorm';
-import { UserEntity } from 'src/dbase/entities/user.entity/user.entity';
+import { User } from 'src/authentication/authentication.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -16,8 +16,8 @@ export class LoginService {
   constructor(
     @InjectRepository(LoginEntity)
     private readonly loginRepository: Repository<LoginEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepositorty: Repository<UserEntity>,
+    @InjectRepository(User)
+    private readonly userRepositorty: Repository<User>,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}

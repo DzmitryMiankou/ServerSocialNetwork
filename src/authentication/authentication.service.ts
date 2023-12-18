@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity/user.entity';
+import { User } from './authentication.entity';
 import { Repository } from 'typeorm';
 import { FormValue } from './dbase.interface';
 import * as bcrypt from 'bcrypt';
@@ -11,10 +11,10 @@ import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class DbaseService {
+export class AuthenticationService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly todoRepositort: Repository<UserEntity>,
+    @InjectRepository(User)
+    private readonly todoRepositort: Repository<User>,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailServise: MailerService,
@@ -30,7 +30,7 @@ export class DbaseService {
       const payload = { username: user?.firstName };
       const activeURL = uuidv4();
 
-      const newUser = new UserEntity();
+      const newUser = new User();
 
       newUser.activeId = activeURL;
       newUser.password = hash;
@@ -75,7 +75,7 @@ export class DbaseService {
   async activeUser(id: number) {
     return await this.todoRepositort
       .createQueryBuilder()
-      .update(`user_entity`)
+      .update(`user`)
       .set({ isActive: true })
       .where('id = :id', { id: id })
       .execute();

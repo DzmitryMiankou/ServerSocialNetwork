@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { DbaseController } from './dbase.controller';
-import { DbaseService } from './dbase.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
+import { AuthenticationController } from './authentication.controller';
+import { AuthenticationService } from './authentication.service';
+import { User } from './authentication.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, LoginEntity]),
+    TypeOrmModule.forFeature([User, LoginEntity]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -20,7 +20,7 @@ import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
       inject: [ConfigService],
     }),
   ],
-  controllers: [DbaseController],
-  providers: [DbaseService],
+  controllers: [AuthenticationController],
+  providers: [AuthenticationService],
 })
-export class DbaseModule {}
+export class AuthenticationModule {}
