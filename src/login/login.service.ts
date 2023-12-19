@@ -75,18 +75,13 @@ export class LoginService {
     }
   }
 
-  async updateRefreshToken(
-    token: string,
-    refresh_token: string,
-  ): Promise<string> {
+  async updateRefreshToken(refresh_token: string): Promise<string> {
     try {
-      const user = this.jwtService.verify(token, {
+      const user = this.jwtService.verify(refresh_token, {
         secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
       });
 
-      const refresh_client: number = this.jwtService.verify(refresh_token, {
-        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
-      })?.sub;
+      const refresh_client: number = user?.sub;
 
       const refresh_DB = await this.loginRepository.find({
         select: [`userId`],
@@ -109,5 +104,20 @@ export class LoginService {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  async logOutUser(refresh_token: string): Promise<void> {
+    const user = this.jwtService.verify(refresh_token, {
+      secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+    });
+
+    await this.loginRepository
+      .createQueryBuilder()
+      .update(`login_entity`)
+      .set({
+        refreshToken: 'logOut',
+      })
+      .where('userId = :userId', { userId: user?.sub })
+      .execute();
   }
 }

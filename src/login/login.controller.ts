@@ -44,8 +44,13 @@ export class LoginController {
   async refreshToken(@Req() request: Request, @Res() response: Response) {
     const newToken = await this.loginService.updateRefreshToken(
       request.cookies.refresh_token as string,
-      request.cookies.refresh_token as string,
     );
     return response.status(201).json({ access_token: newToken });
+  }
+
+  @Get(`logOut`)
+  async logOutUser(@Req() request: Request, @Res() response: Response) {
+    await this.loginService.logOutUser(request.cookies.refresh_token as string);
+    return response.status(201).json({ ok: 'ok' });
   }
 }
