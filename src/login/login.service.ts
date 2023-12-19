@@ -104,20 +104,6 @@ export class LoginService {
       );
 
       return accessToken;
-      /*const loadedPosts = await this.loginRepository.find({
-        select: [`refreshToken`],
-        where: [{ id: 1 }],
-      });*/
-      /* await this.loginRepository
-        .createQueryBuilder()
-        .update(`login_entity`)
-        .set({
-          refreshToken: await this.jwtService.signAsync(payload, {
-            expiresIn: '30d',
-          }),
-        })
-        .where('userId = :userId', { userId: user?.id })
-        .execute();*/
     } catch (error) {
       throw new UnauthorizedException();
     }
