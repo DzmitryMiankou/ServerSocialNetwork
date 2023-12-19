@@ -55,7 +55,8 @@ export class LoginController {
   @Get(`refreshToken`)
   async refreshToken(@Req() request: Request, @Res() response: Response) {
     const newToken = await this.loginService.updateRefreshToken(
-      request.cookies.refresh_token,
+      request.cookies.refresh_token as string,
+      request.cookies.refresh_token as string,
     );
     return response.status(201).json({ access_token: newToken });
   }

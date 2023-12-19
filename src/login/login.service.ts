@@ -61,11 +61,15 @@ export class LoginService {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
+      const dataUser = { ...user };
+
+      for (const el in dataUser) {
+        if (el === 'isActive' || el === 'activeId' || el === 'password')
+          delete dataUser[el];
+      }
+
       return {
-        id: user?.id,
-        firstName: user?.firstName,
-        lastName: user?.lastName,
-        email: user?.email,
+        ...dataUser,
         access_token: accessToken,
         refresh_token: refreshToken,
       };
@@ -89,11 +93,27 @@ export class LoginService {
     }
   }
 
-  async updateRefreshToken(token: string): Promise<string> {
+  async updateRefreshToken(
+    token: string,
+    refresh_token: string,
+  ): Promise<string> {
     try {
       const user = this.jwtService.verify(token, {
         secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
       });
+
+      const refresh_client: number = this.jwtService.verify(refresh_token, {
+        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+      })?.sub;
+
+      const refresh_DB = await this.loginRepository.find({
+        select: [`userId`],
+        where: [{ refreshToken: refresh_token }],
+      });
+
+      if (!refresh_DB) throw new UnauthorizedException();
+      if (refresh_DB[0].userId !== refresh_client)
+        throw new UnauthorizedException();
 
       const accessToken = await this.jwtService.signAsync(
         { sub: user?.sub, username: user?.username },
