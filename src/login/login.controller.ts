@@ -4,14 +4,11 @@ import {
   Post,
   Res,
   Get,
-  Param,
   Req,
-  UseGuards,
   BadRequestException,
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { Response, Request } from 'express';
-import { AuthGuard } from 'src/guards/auth/auth.guard';
 
 @Controller('app')
 export class LoginController {
@@ -41,15 +38,6 @@ export class LoginController {
     }
 
     throw new BadRequestException(data);
-  }
-
-  @UseGuards(AuthGuard)
-  @Get(`allUsers/:users`)
-  async searchUsers(@Param(`users`) user: string, @Res() response: Response) {
-    const users = await this.loginService.searchUsers(user.replace(`:`, ''));
-    if (user.replace(`:`, '') === '')
-      return response.status(200).json(undefined);
-    return response.status(200).json(users);
   }
 
   @Get(`refreshToken`)

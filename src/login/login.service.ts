@@ -5,14 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginEntity } from './entities/login.entity/login.entity';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/authentication/authentication.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import {
-  UserData,
-  UserPprivateData,
-} from 'src/interfaces/user-interface/user-interface';
+import { UserPprivateData } from 'src/interfaces/user-interface/user-interface';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -73,21 +70,6 @@ export class LoginService {
         access_token: accessToken,
         refresh_token: refreshToken,
       };
-    } catch (error) {
-      throw new BadRequestException(error.sqlMessage);
-    }
-  }
-
-  async searchUsers(str: string): Promise<UserData[]> {
-    try {
-      const loadedPosts = await this.userRepositorty.find({
-        select: [`id`, `firstName`, `lastName`],
-        where: [
-          { isActive: true, firstName: Like(`%${str}%`) },
-          { isActive: true, lastName: Like(`%${str}%`) },
-        ],
-      });
-      return loadedPosts;
     } catch (error) {
       throw new BadRequestException(error.sqlMessage);
     }

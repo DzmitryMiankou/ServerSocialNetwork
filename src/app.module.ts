@@ -17,6 +17,7 @@ import { LoginEntity } from './login/entities/login.entity/login.entity';
 import { GatewayModule } from './gateway/gateway.module';
 import { AuthMiddleware } from './middleware/auth/auth.middleware';
 import { AuthenticationModule } from './authentication/authentication.module';
+import { SearchUserModule } from './search-user/search-user.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
     LoginModule,
     GatewayModule,
     AuthenticationModule,
+    SearchUserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
