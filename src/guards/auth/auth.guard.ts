@@ -28,11 +28,6 @@ export class AuthGuard implements CanActivate {
 
       if (!refresh_token && !access_token) throw new UnauthorizedException();
 
-      const vRf = this.JWT.verify(refresh_token, {
-        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
-      });
-
-      if (!vRf) throw new UnauthorizedException();
       req.user = this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
