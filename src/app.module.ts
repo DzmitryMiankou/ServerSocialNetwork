@@ -9,9 +9,6 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './authentication/authentication.entity';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { join } from 'path';
 import { LoginModule } from './login/login.module';
 import { LoginEntity } from './login/entities/login.entity/login.entity';
 import { GatewayModule } from './gateway/gateway.module';
@@ -35,33 +32,6 @@ import { SearchUserModule } from './search-user/search-user.module';
         database: configService.get<string>(`DATABASE_DB`),
         entities: [User, LoginEntity],
         synchronize: true,
-      }),
-      inject: [ConfigService],
-    }),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>(`MAIL_HOST`),
-          port: +configService.get<number>(`MAIL_PORT`),
-          ignoreTLS: false,
-          secure: false,
-          auth: {
-            user: configService.get<string>(`MAIL_USER`),
-            pass: configService.get<string>(`MAIL_PASSWORD`),
-          },
-        },
-        defaults: {
-          from: `"No Reply" <${configService.get<string>(`MAIL_FROM`)}>`,
-        },
-        preview: true,
-        template: {
-          dir: join(__dirname, `views/email`),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
       }),
       inject: [ConfigService],
     }),
