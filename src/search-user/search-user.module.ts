@@ -5,18 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
 import { User } from 'src/authentication/authentication.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { config } from 'src/config/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([LoginEntity, User]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: () => ({
-        global: true,
-      }),
-      inject: [ConfigService],
-    }),
+    JwtModule.registerAsync({ ...config }),
   ],
   controllers: [SearchUserController],
   providers: [SearchUserService],

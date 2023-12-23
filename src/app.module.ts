@@ -15,6 +15,7 @@ import { GatewayModule } from './gateway/gateway.module';
 import { AuthMiddleware } from './middleware/auth/auth.middleware';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { SearchUserModule } from './search-user/search-user.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SearchUserModule } from './search-user/search-user.module';
     GatewayModule,
     AuthenticationModule,
     SearchUserModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
