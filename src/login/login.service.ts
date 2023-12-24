@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserPprivateData } from 'src/interfaces/user-interface/user-interface';
 import { ConfigService } from '@nestjs/config';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class LoginService {
@@ -21,6 +23,7 @@ export class LoginService {
     private readonly userRepositorty: Repository<User>,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Inject(`CACHE_MANAGER`) private cacheManager: Cache,
   ) {}
 
   async login({
@@ -110,7 +113,7 @@ export class LoginService {
     const user = this.jwtService.verify(refresh_token, {
       secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
     });
-
+    await this.cacheManager.del(`user_id_${user.sub}`);
     await this.loginRepository
       .createQueryBuilder()
       .update(`login_entity`)

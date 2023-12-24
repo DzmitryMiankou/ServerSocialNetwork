@@ -10,8 +10,8 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get(`user`)
   async searchUsers(@Req() req: Request, @Res() response: Response) {
-    const token = await req.headers.authorization.replace('Bearer=', '');
-    this.userServise.userData(token);
-    response.status(200).json('ok');
+    const token = req.headers.authorization.replace('Bearer=', '') as string;
+    const user = await this.userServise.userData(token);
+    return response.status(200).json(user[0]);
   }
 }

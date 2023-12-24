@@ -4,8 +4,11 @@ export interface UserData {
   lastName: string;
 }
 
-export interface UserPprivateData extends UserData {
+export interface UserDataEmail extends UserData {
   email: string;
+}
+
+export interface UserPprivateData extends UserDataEmail {
   access_token: string;
   refresh_token: string;
 }

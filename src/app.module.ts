@@ -16,9 +16,22 @@ import { AuthMiddleware } from './middleware/auth/auth.middleware';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { SearchUserModule } from './search-user/search-user.module';
 import { UserModule } from './user/user.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        ttl: +configService.get<number>(`REDIS_TTL`),
+        store: redisStore,
+        host: configService.get<string>(`REDIS_HOST`),
+        port: configService.get<string>(`REDIS_PORT`),
+      }),
+      inject: [ConfigService],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
