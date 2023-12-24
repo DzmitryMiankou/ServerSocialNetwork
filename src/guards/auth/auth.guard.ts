@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
     try {
       const req = context.switchToHttp().getRequest();
       const access_token = req.headers.authorization.replace(
-        'Bearer',
+        'Bearer=',
         '',
       ) as string;
 
