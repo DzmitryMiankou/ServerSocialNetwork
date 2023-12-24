@@ -1,24 +1,21 @@
 import {
   Column,
   Entity,
-  JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from 'src/authentication/authentication.entity';
 
 @Entity()
-export class Login {
+@Unique(['contactId', 'user'])
+export class Contacts {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  refreshToken: string;
+  contactId: number;
 
-  @Column()
-  userId: number;
-
-  @OneToOne(() => User)
-  @JoinColumn()
-  user: User[];
+  @ManyToOne(() => User, (user) => user.contacts)
+  user: User;
 }

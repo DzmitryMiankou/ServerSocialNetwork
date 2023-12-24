@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { LoginController } from './login.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoginEntity } from './entities/login.entity/login.entity';
+import { Login } from './entities/login.entity/login.entity';
 import { User } from 'src/authentication/authentication.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([LoginEntity, User]),
+    TypeOrmModule.forFeature([Login, User]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

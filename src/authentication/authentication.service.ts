@@ -7,7 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
-import { LoginEntity } from 'src/login/entities/login.entity/login.entity';
+import { Login } from 'src/login/entities/login.entity/login.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -40,7 +40,7 @@ export class AuthenticationService {
 
       await this.todoRepositort.manager.save(newUser);
 
-      const login = new LoginEntity();
+      const login = new Login();
       login.refreshToken = await this.jwtService.signAsync(payload, {
         expiresIn: '30d',
       });

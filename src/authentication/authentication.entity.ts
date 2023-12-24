@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Contacts } from 'src/contacts/contacts.entity/contacts.entity';
 
 @Entity()
 export class User {
@@ -30,4 +31,7 @@ export class User {
 
   @Column()
   activeId: string;
+
+  @OneToMany(() => Contacts, (photo) => photo.user)
+  contacts: Contacts[];
 }

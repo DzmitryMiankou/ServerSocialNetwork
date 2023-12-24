@@ -10,7 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './authentication/authentication.entity';
 import { LoginModule } from './login/login.module';
-import { LoginEntity } from './login/entities/login.entity/login.entity';
+import { Login } from './login/entities/login.entity/login.entity';
 import { GatewayModule } from './gateway/gateway.module';
 import { AuthMiddleware } from './middleware/auth/auth.middleware';
 import { AuthenticationModule } from './authentication/authentication.module';
@@ -18,6 +18,8 @@ import { SearchUserModule } from './search-user/search-user.module';
 import { UserModule } from './user/user.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { ContactsModule } from './contacts/contacts.module';
+import { Contacts } from './contacts/contacts.entity/contacts.entity';
 
 @Module({
   imports: [
@@ -44,7 +46,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         username: configService.get<string>(`USERNAME_DB`),
         password: configService.get<string>(`PASSWORD_DB`),
         database: configService.get<string>(`DATABASE_DB`),
-        entities: [User, LoginEntity],
+        entities: [User, Login, Contacts],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -54,6 +56,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     AuthenticationModule,
     SearchUserModule,
     UserModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoginEntity } from './entities/login.entity/login.entity';
+import { Login } from './entities/login.entity/login.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/authentication/authentication.entity';
 import * as bcrypt from 'bcrypt';
@@ -17,8 +17,8 @@ import { Cache } from 'cache-manager';
 @Injectable()
 export class LoginService {
   constructor(
-    @InjectRepository(LoginEntity)
-    private readonly loginRepository: Repository<LoginEntity>,
+    @InjectRepository(Login)
+    private readonly loginRepository: Repository<Login>,
     @InjectRepository(User)
     private readonly userRepositorty: Repository<User>,
     private jwtService: JwtService,
@@ -32,7 +32,7 @@ export class LoginService {
   }: {
     email: string;
     password: string;
-  }): Promise<UserPprivateData> {
+  }): Promise<UserPprivateData | { code: number; message: string }> {
     try {
       const user = await this.userRepositorty.findOneBy({ email: email });
       if (user === null) throw new BadRequestException('Not user');
@@ -49,7 +49,7 @@ export class LoginService {
 
       await this.loginRepository
         .createQueryBuilder()
-        .update(`login_entity`)
+        .update(`login`)
         .set({
           refreshToken: refreshToken,
         })
@@ -74,7 +74,7 @@ export class LoginService {
         refresh_token: refreshToken,
       };
     } catch (error) {
-      throw new BadRequestException(error.sqlMessage);
+      return { code: 400, message: error.sqlMessage };
     }
   }
 
@@ -116,7 +116,7 @@ export class LoginService {
     await this.cacheManager.del(`user_id_${user.sub}`);
     await this.loginRepository
       .createQueryBuilder()
-      .update(`login_entity`)
+      .update(`login`)
       .set({
         refreshToken: 'logOut',
       })

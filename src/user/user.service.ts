@@ -38,7 +38,7 @@ export class UserService {
         await this.cacheManager.set(
           `user_id_${verify.sub}`,
           JSON.stringify(user),
-          1800000,
+          3600000,
         );
         return user;
       }
