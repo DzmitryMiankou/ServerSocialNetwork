@@ -22,8 +22,6 @@ export class UserService {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      await this.cacheManager.set(`test`, { id: verify, name: 'dmi' }, 3600000);
-
       const value: UserDataEmail[] = await this.cacheManager.get(
         `user_id_${verify?.sub}`,
       );

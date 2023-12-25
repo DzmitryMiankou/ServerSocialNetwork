@@ -32,6 +32,6 @@ export class User {
   @Column()
   activeId: string;
 
-  @OneToMany(() => Contacts, (photo) => photo.user)
+  @OneToMany(() => Contacts, (photo) => photo.contactId)
   contacts: Contacts[];
 }

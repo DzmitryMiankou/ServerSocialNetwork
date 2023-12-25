@@ -14,8 +14,8 @@ export class Contacts {
   id: number;
 
   @Column()
-  contactId: number;
+  user: number;
 
   @ManyToOne(() => User, (user) => user.contacts)
-  user: User;
+  contactId: User;
 }

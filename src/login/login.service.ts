@@ -63,10 +63,15 @@ export class LoginService {
 
       const dataUser = { ...user };
 
-      for (const el in dataUser) {
+      for (const el in dataUser)
         if (el === 'isActive' || el === 'activeId' || el === 'password')
           delete dataUser[el];
-      }
+
+      await this.cacheManager.set(
+        `user_id_${user?.id}`,
+        [{ ...dataUser }],
+        3600000,
+      );
 
       return {
         ...dataUser,
@@ -87,7 +92,7 @@ export class LoginService {
       const refresh_client: number = user?.sub;
 
       const refresh_DB = await this.loginRepository.find({
-        select: [`userId`],
+        select: { userId: true },
         where: [{ refreshToken: refresh_token }],
       });
 
@@ -113,7 +118,7 @@ export class LoginService {
     const user = this.jwtService.verify(refresh_token, {
       secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
     });
-    await this.cacheManager.del(`user_id_${user.sub}`);
+    await this.cacheManager.del(`user_id_${user?.sub}`);
     await this.loginRepository
       .createQueryBuilder()
       .update(`login`)

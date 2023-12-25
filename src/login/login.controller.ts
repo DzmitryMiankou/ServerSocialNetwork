@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { Response, Request } from 'express';
+import { cookiesParams } from 'src/config/config';
 
 @Controller('app')
 export class LoginController {
@@ -28,12 +29,7 @@ export class LoginController {
       const resData = { ...data };
       delete resData['refresh_token'];
       return response
-        .cookie('refresh_token', data.refresh_token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: 2592000000,
-        })
+        .cookie('refresh_token', data.refresh_token, cookiesParams)
         .json({ ...resData });
     }
 
@@ -51,6 +47,6 @@ export class LoginController {
   @Get(`logOut`)
   async logOutUser(@Req() request: Request, @Res() response: Response) {
     await this.loginService.logOutUser(request.cookies.refresh_token as string);
-    return response.status(201).json({ ok: 'ok' });
+    return response.clearCookie('refresh_token', cookiesParams).json('logout');
   }
 }

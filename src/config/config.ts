@@ -7,3 +7,15 @@ export const config = {
   }),
   inject: [ConfigService],
 };
+
+export const cookiesParams: {
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: boolean | 'lax' | 'strict' | 'none';
+  maxAge: number;
+} = {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'lax',
+  maxAge: 2592000000,
+};
