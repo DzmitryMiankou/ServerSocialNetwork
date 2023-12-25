@@ -22,25 +22,21 @@ export class UserService {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      const value = (await this.cacheManager.get(
-        `user_id_${verify.sub}`,
-      )) as string;
+      await this.cacheManager.set(`test`, { id: verify, name: 'dmi' }, 3600000);
 
-      if (value) {
-        const parse = await JSON.parse(value);
-        return parse;
-      }
+      const value: UserDataEmail[] = await this.cacheManager.get(
+        `user_id_${verify?.sub}`,
+      );
+
+      if (value) return value;
+
       if (!value) {
         const user = await this.userRepositorty.find({
-          select: [`id`, `firstName`, `lastName`, `email`],
-          where: [{ id: verify.sub }],
+          select: { id: true, firstName: true, lastName: true, email: true },
+          where: [{ id: verify?.sub }],
         });
-        await this.cacheManager.set(
-          `user_id_${verify.sub}`,
-          JSON.stringify(user),
-          3600000,
-        );
-        return user;
+        await this.cacheManager.set(`user_id_${verify?.sub}`, user, 3600000);
+        return [{ ...user[0] }];
       }
     } catch (error) {
       throw new UnauthorizedException();
