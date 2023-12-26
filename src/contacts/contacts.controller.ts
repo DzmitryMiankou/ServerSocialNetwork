@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ContactsService } from './contacts.service';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
@@ -23,5 +31,12 @@ export class ContactsController {
     const contacts = await this.contactServise.allContacts(user);
     if (Array.isArray(contacts)) return response.status(201).json(contacts);
     return response.status(400).json(contacts);
+  }
+
+  @Delete(`del_contact`)
+  async delContacts(@Req() request: Request, @Res() response: Response) {
+    const del = await this.contactServise.delContacts(request.body?.id);
+    if (typeof del === 'string') return response.status(200).json(del);
+    return response.status(201).json(del);
   }
 }

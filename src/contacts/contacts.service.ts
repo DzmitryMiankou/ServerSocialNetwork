@@ -71,4 +71,20 @@ export class ContactsService {
       return { code: 400, message: error.sqlMessage };
     }
   }
+
+  async delContacts(
+    id: number,
+  ): Promise<'ok' | { code: number; message: string }> {
+    try {
+      await this.todoRepositort
+        .createQueryBuilder(`contacts`)
+        .delete()
+        .from(Contacts)
+        .where('id = :id', { id: id })
+        .execute();
+      return 'ok';
+    } catch (error) {
+      return { code: 400, message: error.sqlMessage };
+    }
+  }
 }
