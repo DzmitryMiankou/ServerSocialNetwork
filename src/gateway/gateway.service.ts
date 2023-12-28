@@ -8,8 +8,15 @@ import { Socket } from 'dgram';
 
 @WebSocketGateway()
 export class GatewayService {
-  @SubscribeMessage(`message`)
-  message(@MessageBody() body: string, @ConnectedSocket() socket: Socket) {
-    socket.emit('message', { name: body });
+  @SubscribeMessage(`all_messages`)
+  message(@MessageBody() id: string, @ConnectedSocket() socket: Socket) {
+    console.log(id);
+    socket.emit('all_messages', { id: 1, name: id });
+  }
+
+  @SubscribeMessage(`send_message`)
+  sendMessage(@MessageBody() id: string, @ConnectedSocket() socket: Socket) {
+    console.log(id);
+    socket.emit(`all_messages`, { id: 1, name: id });
   }
 }
