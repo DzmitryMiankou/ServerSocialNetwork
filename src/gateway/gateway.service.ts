@@ -9,9 +9,13 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Namespace, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:3000',
+  },
+})
 export class GatewayService
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -21,17 +25,19 @@ export class GatewayService
   ) {}
 
   @WebSocketServer()
-  io: Namespace;
+  io: Server;
 
-  handleDisconnect(socket: Socket) {}
+  handleDisconnect(sockt: Socket) {
+    console.log(`Disconnect: ${sockt.id}`);
+  }
+
   handleConnection(client: Socket) {
-    console.log(client.id);
+    console.log(client.handshake.auth);
     try {
       const access_token =
         client.handshake.auth.Authorization.replace('Bearer=', '') ?? null;
 
       if (!access_token) return this.handleDisconnect(client);
-
       this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
@@ -52,5 +58,11 @@ export class GatewayService
   @SubscribeMessage(`send_message`)
   sendMessage(@MessageBody() id: string, @ConnectedSocket() socket: Socket) {
     socket.emit(`all_messages`, { id: 1, name: id });
+  }
+
+  @SubscribeMessage(`click`)
+  clickHandler(@ConnectedSocket() socket: Socket) {
+    console.log('click');
+    socket.emit(`click`);
   }
 }
