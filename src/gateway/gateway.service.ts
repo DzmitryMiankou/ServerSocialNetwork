@@ -76,6 +76,7 @@ export class GatewayService
         message: 'Hello. How are you?',
       },
     ];
+
     socket.emit('all_messages', messages);
   }
 
