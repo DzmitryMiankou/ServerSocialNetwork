@@ -18,6 +18,7 @@ export class Messages {
   message: string;
 
   @Column({
+    default: null,
     length: 300,
   })
   pathImg: string;
@@ -29,6 +30,7 @@ export class Messages {
 
   @Column({
     length: 50,
+    default: null,
   })
   updatedAt: string;
 
