@@ -8,7 +8,7 @@ import { Contacts } from './contacts.entity/contacts.entity';
 interface ContactsType {
   id: number;
   user: number;
-  contactId: {
+  contact: {
     id: number;
     firstName: string;
     lastName: string;
@@ -60,10 +60,10 @@ export class ContactsService {
       const contacts: ContactsType[] = await this.todoRepositort.find({
         where: { user: userId },
         select: {
-          contactId: { id: true, firstName: true, lastName: true, email: true },
+          contact: { id: true, firstName: true, lastName: true, email: true },
         },
         relations: {
-          contactId: true,
+          contact: true,
         },
       });
       return [...contacts];

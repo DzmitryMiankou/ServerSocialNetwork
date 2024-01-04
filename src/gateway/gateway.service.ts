@@ -42,25 +42,27 @@ export class GatewayService
 
   handleDisconnect(socket: Socket) {
     console.log(`Disconnect: ${socket.id}`);
-
-    this.io.use((socket, next) => {
-      const err: any = new Error('not authorized');
-      err.data = { content: 'Please retry later' };
-      next();
-    });
   }
 
   handleConnection(client: Socket) {
     try {
-      const access_token =
-        client.handshake.auth.Authorization.replace('Bearer=', '') ?? null;
+      const access_token = (client.handshake.auth.Authorization.replace(
+        'Bearer=',
+        '',
+      ) ?? null) as string | null;
       if (!access_token) return this.handleDisconnect(client);
 
-      return this.JWT.verify(access_token, {
+      const verify = this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
+
+      console.log(`Connection: ${client.id}. User_id: ${verify.sub}`);
     } catch (error) {
-      this.handleDisconnect(client);
+      return this.io.use((socket, next) => {
+        const err: any = new Error('not authorized');
+        err.data = { content: 'Please retry later' };
+        next();
+      });
     }
   }
 
