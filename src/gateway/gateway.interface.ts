@@ -1,6 +1,9 @@
 export interface Message {
-  timeSent: string;
+  createdAt: string;
+  sourceId: number;
   message: string;
+  targetId: number;
+  pathImg?: null | string;
 }
 
 export interface LeftJoinType {
@@ -9,9 +12,17 @@ export interface LeftJoinType {
   targets_lastName: string;
   targets_email: string;
   targets_password: string;
-  targets_isActive: number;
+  targets_isActive: 0 | 1;
   targets_activeId: string;
   targets_socketId: string | null;
+  sources_id: number;
+  sources_firstName: string;
+  sources_lastName: string;
+  sources_email: string;
+  sources_password: string;
+  sources_isActive: 0 | 1;
+  sources_activeId: string;
+  sources_socketId: null | string;
   targetId: number;
   sourceId: number;
 }
@@ -36,7 +47,10 @@ export interface MessagesType {
 export interface DialoguesType {
   targetId: number;
   sourceId: number;
-  firstName: string;
-  lastName: string;
-  activeId: string;
+  target: { firstName: string; lastName: string; activeId: string };
+  sources: {
+    firstName: string;
+    lastName: string;
+    activeId: string;
+  };
 }

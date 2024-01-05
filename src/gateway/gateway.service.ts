@@ -82,8 +82,9 @@ export class GatewayService
       .select(['targetId', 'sourceId'])
       .distinct(true)
       .leftJoinAndSelect('messages.target', 'targets')
-      .where('messages.sourceId = :sourceId', { sourceId: 1 })
-      .orWhere('messages.targetId = :targetId', { targetId: 1 })
+      .leftJoinAndSelect('messages.source', 'sources')
+      .where('messages.sourceId = :sourceId', { sourceId: id })
+      .orWhere('messages.targetId = :targetId', { targetId: id })
       .orderBy('messages.id', 'ASC')
       .getRawMany();
 
@@ -91,22 +92,44 @@ export class GatewayService
       return {
         targetId: obj.targetId,
         sourceId: obj.sourceId,
-        firstName: obj.targets_firstName,
-        lastName: obj.targets_lastName,
-        activeId: obj.targets_activeId,
+        target: {
+          firstName: obj.targets_firstName,
+          lastName: obj.targets_lastName,
+          activeId: obj.targets_activeId,
+        },
+        sources: {
+          firstName: obj.sources_firstName,
+          lastName: obj.sources_lastName,
+          activeId: obj.sources_activeId,
+        },
       };
     });
 
-    // console.log(dialogues);
+    console.log(dialogues);
 
-    socket.emit('dialogues', dialogues);
+    const filterDialogues = (): DialoguesType[] => {
+      const arr: DialoguesType[] = [];
+      let start: DialoguesType = dialogues[0];
+      for (let i = 0; i < dialogues.length; ++i) {
+        if (
+          dialogues[i].targetId !== start.targetId ||
+          dialogues[i].sourceId !== start.sourceId
+        ) {
+          start = dialogues[i];
+          arr.push(dialogues[i]);
+        }
+      }
+      return arr;
+    };
+
+    socket.emit('dialogues', filterDialogues());
   }
 
   @SubscribeMessage(`all_messages`)
-  async message(@MessageBody() id: string, @ConnectedSocket() socket: Socket) {
+  async message(@MessageBody() id: number, @ConnectedSocket() socket: Socket) {
     const messagesRaw = await this.messagesRepository.find({
       take: 100,
-      where: [{ sourceId: 1 }, { targetId: 1 }],
+      where: [{ sourceId: id }, { targetId: id }],
       relations: { target: true },
     });
 
@@ -128,10 +151,10 @@ export class GatewayService
   ) {
     socket.emit(`send_message`, message);
     await this.messagesRepository.save({
-      sourceId: 3,
-      targetId: 1,
+      sourceId: message.sourceId,
+      targetId: message.targetId,
       message: message.message,
-      createdAt: message.timeSent,
+      createdAt: message.createdAt,
     });
   }
 
