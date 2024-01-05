@@ -13,32 +13,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Messages } from './entity/messages.entity';
 import { Repository } from 'typeorm';
-
-interface Message {
-  timeSent: string;
-  message: string;
-}
-
-interface LeftJoinType {
-  targets_id: number;
-  targets_firstName: string;
-  targets_lastName: string;
-  targets_email: string;
-  targets_password: string;
-  targets_isActive: number;
-  targets_activeId: string;
-  targets_socketId: string | null;
-  targetId: number;
-  sourceId: number;
-}
-
-interface DialoguesType {
-  targetId: number;
-  sourceId: number;
-  firstName: string;
-  lastName: string;
-  activeId: string;
-}
+import {
+  Message,
+  LeftJoinType,
+  MessagesType,
+  DialoguesType,
+} from './gateway.interface';
 
 export interface ServerToClientEvents {
   chat: (e: Message) => void;
@@ -117,39 +97,26 @@ export class GatewayService
       };
     });
 
-    console.log(dialogues);
+    // console.log(dialogues);
 
     socket.emit('dialogues', dialogues);
   }
 
   @SubscribeMessage(`all_messages`)
   async message(@MessageBody() id: string, @ConnectedSocket() socket: Socket) {
-    const messages = [
-      {
-        timeSent: new Date(Date.now()).toLocaleString('en-US'),
-        message: 'Hi, my name is Silver.',
-      },
-      {
-        timeSent: new Date(Date.now()).toLocaleString('en-US'),
-        message: 'Hello. How are you?',
-      },
-    ];
-
     const messagesRaw = await this.messagesRepository.find({
       take: 100,
       where: [{ sourceId: 1 }, { targetId: 1 }],
       relations: { target: true },
     });
 
-    const messagess = messagesRaw.map((el) => {
+    const messages: MessagesType[] = messagesRaw.map((el) => {
       for (const del in el.target)
         if (del === 'password' || del === 'isActive' || del === 'socketId')
           delete el.target[del];
 
       return { ...el, target: { ...el.target } };
     });
-
-    console.log(messagess);
 
     socket.emit('all_messages', messages);
   }
