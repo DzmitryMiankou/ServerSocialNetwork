@@ -25,6 +25,7 @@ export interface LeftJoinType {
   sources_socketId: null | string;
   targetId: number;
   sourceId: number;
+  createdAt: string;
 }
 
 export interface MessagesType {
@@ -47,6 +48,7 @@ export interface MessagesType {
 export interface DialoguesType {
   targetId: number;
   sourceId: number;
+  createdAt: string;
   target: { firstName: string; lastName: string; activeId: string };
   sources: {
     firstName: string;

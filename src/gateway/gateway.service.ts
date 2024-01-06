@@ -78,8 +78,8 @@ export class GatewayService
     @ConnectedSocket() socket: Socket,
   ) {
     const dialoguesRaw: LeftJoinType[] = await this.messagesRepository
-      .createQueryBuilder(`messages`)
-      .select(['targetId', 'sourceId'])
+      .createQueryBuilder('messages')
+      .select(['targetId', 'sourceId', 'createdAt'])
       .distinct(true)
       .leftJoinAndSelect('messages.target', 'targets')
       .leftJoinAndSelect('messages.source', 'sources')
@@ -92,6 +92,7 @@ export class GatewayService
       return {
         targetId: obj.targetId,
         sourceId: obj.sourceId,
+        createdAt: obj.createdAt,
         target: {
           firstName: obj.targets_firstName,
           lastName: obj.targets_lastName,
@@ -105,24 +106,16 @@ export class GatewayService
       };
     });
 
-    console.log(dialogues);
+    const newDialogues = {};
+    const filterDialogues = dialogues.filter(({ targetId }) => {
+      // console.log(!newDialogues[targetId]);
+      // console.log(targetId);
+      return !newDialogues[targetId] && (newDialogues[targetId] = 1);
+    });
 
-    const filterDialogues = (): DialoguesType[] => {
-      const arr: DialoguesType[] = [];
-      let start: DialoguesType = dialogues[0];
-      for (let i = 0; i < dialogues.length; ++i) {
-        if (
-          dialogues[i].targetId !== start.targetId ||
-          dialogues[i].sourceId !== start.sourceId
-        ) {
-          start = dialogues[i];
-          arr.push(dialogues[i]);
-        }
-      }
-      return arr;
-    };
+    //console.log(newDialogues);
 
-    socket.emit('dialogues', filterDialogues());
+    socket.emit('dialogues', filterDialogues);
   }
 
   @SubscribeMessage(`all_messages`)
