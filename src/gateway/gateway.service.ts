@@ -85,7 +85,7 @@ export class GatewayService
       .leftJoinAndSelect('messages.source', 'sources')
       .where('messages.sourceId = :sourceId', { sourceId: id })
       .orWhere('messages.targetId = :targetId', { targetId: id })
-      .orderBy('messages.id', 'ASC')
+      .orderBy('messages.id', 'DESC')
       .getRawMany();
 
     const dialogues: DialoguesType[] = dialoguesRaw.map((obj) => {
@@ -106,14 +106,12 @@ export class GatewayService
       };
     });
 
-    const newDialogues = {};
+    //console.log(dialogues);
+
+    const newDialogues = { '1': 1 };
     const filterDialogues = dialogues.filter(({ targetId }) => {
-      // console.log(!newDialogues[targetId]);
-      // console.log(targetId);
       return !newDialogues[targetId] && (newDialogues[targetId] = 1);
     });
-
-    //console.log(newDialogues);
 
     socket.emit('dialogues', filterDialogues);
   }
