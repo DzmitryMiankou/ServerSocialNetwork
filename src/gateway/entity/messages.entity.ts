@@ -19,7 +19,7 @@ export class Messages {
 
   @Column({
     default: null,
-    length: 300,
+    length: 100,
   })
   pathImg: string;
 

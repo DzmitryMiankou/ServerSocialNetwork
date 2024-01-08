@@ -3,6 +3,12 @@ import { IsEmail, IsString, MinLength } from 'class-validator';
 import { Contacts } from 'src/contacts/contacts.entity/contacts.entity';
 import { Messages } from 'src/gateway/entity/messages.entity';
 
+enum UserRole {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  GHOST = 'ghost',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -44,6 +50,13 @@ export class User {
     default: null,
   })
   socketId: string;
+
+  @Column({
+    type: 'set',
+    enum: UserRole,
+    default: UserRole.GHOST,
+  })
+  role: UserRole[];
 
   @OneToMany(() => Contacts, (photo) => photo.contact)
   contacts: Contacts[];

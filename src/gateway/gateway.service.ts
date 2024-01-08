@@ -87,6 +87,7 @@ export class GatewayService
         targetId: id,
       })
       .orderBy('messages.id', 'DESC')
+      .limit(100)
       .getRawMany();
 
     const dialogues: DialoguesType[] = dialoguesRaw.map((obj) => {
@@ -113,16 +114,13 @@ export class GatewayService
     });
 
     const arr: DialoguesType[] = [];
-    let a: DialoguesType = dialogues[0];
-    for (const i in dialogues) {
-      if (!arr[0]) arr.push(dialogues[0]);
-      if (
-        dialogues[+i + 1]?.targetId !== a.sourceId &&
-        dialogues[+i + 1]?.targetId !== a.targetId
-      )
-        if (dialogues[+i + 1]) {
-          a = dialogues[+i + 1];
-          arr.push(dialogues[+i + 1]);
+    let unique: DialoguesType = filterDialogues[0];
+    for (const i in filterDialogues) {
+      !arr[0] && arr.push(filterDialogues[0]);
+      if (filterDialogues[+i + 1]?.targetId !== unique.sourceId)
+        if (filterDialogues[+i + 1]) {
+          unique = filterDialogues[+i + 1];
+          arr.push(filterDialogues[+i + 1]);
         }
     }
 
