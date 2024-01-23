@@ -19,14 +19,7 @@ import {
   MessagesType,
   DialoguesType,
 } from './gateway.interface';
-
-export interface ServerToClientEvents {
-  chat: (e: Message) => void;
-}
-
-export interface ClientToServerEvents {
-  chat: (e: Message) => void;
-}
+import { User } from 'src/authentication/authentication.entity';
 
 @WebSocketGateway({
   cors: {
@@ -41,16 +34,30 @@ export class GatewayService
     private readonly configService: ConfigService,
     @InjectRepository(Messages)
     private readonly messagesRepository: Repository<Messages>,
+    @InjectRepository(User)
+    private readonly userRepositort: Repository<User>,
   ) {}
 
   @WebSocketServer()
-  io: Server = new Server<ServerToClientEvents, ClientToServerEvents>();
+  io: Server = new Server();
 
-  handleDisconnect(socket: Socket) {
-    console.log(`Disconnect: ${socket.id}`);
+  async handleDisconnect(socket: Socket) {
+    await this.userRepositort
+      .createQueryBuilder()
+      .update(`user`)
+      .set({
+        socketId: 'Disconnect',
+      })
+      .where('socketId = :socketId', { socketId: socket.id })
+      .execute();
+    return this.io.use((socket, next) => {
+      const err: any = new Error('not authorized');
+      err.data = { content: 'Please retry later' };
+      next();
+    });
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     try {
       const access_token = (client.handshake.auth.Authorization.replace(
         'Bearer=',
@@ -62,13 +69,17 @@ export class GatewayService
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      console.log(`Connection: ${client.id}. User_id: ${verify.sub}`);
+      await this.userRepositort
+        .createQueryBuilder()
+        .update(`user`)
+        .set({
+          socketId: client.id,
+        })
+        .where('id = :id', { id: verify.sub })
+        .execute();
     } catch (error) {
-      return this.io.use((socket, next) => {
-        const err: any = new Error('not authorized');
-        err.data = { content: 'Please retry later' };
-        next();
-      });
+      console.log(error);
+      this.handleDisconnect(client);
     }
   }
 
