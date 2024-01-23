@@ -42,6 +42,8 @@ export class GatewayService
   io: Server = new Server();
 
   async handleDisconnect(socket: Socket) {
+    //console.log(socket.handshake.auth.Authorization);
+
     await this.userRepositort
       .createQueryBuilder()
       .update(`user`)
@@ -50,11 +52,6 @@ export class GatewayService
       })
       .where('socketId = :socketId', { socketId: socket.id })
       .execute();
-    return this.io.use((socket, next) => {
-      const err: any = new Error('not authorized');
-      err.data = { content: 'Please retry later' };
-      next();
-    });
   }
 
   async handleConnection(client: Socket) {
@@ -63,12 +60,25 @@ export class GatewayService
         'Bearer=',
         '',
       ) ?? null) as string | null;
-      if (!access_token) return this.handleDisconnect(client);
+      if (!access_token)
+        return this.io.use((socket, next) => {
+          const err: any = new Error('not authorized');
+          err.data = { content: 'Please retry later' };
+          next(err);
+        });
 
       const verify = this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
+      if (!verify)
+        return this.io.use((socket, next) => {
+          const err: any = new Error('not authorized');
+          err.data = { content: 'Please retry later' };
+          next(err);
+        });
+
+      //console.log(client.handshake.auth.Authorization);
       await this.userRepositort
         .createQueryBuilder()
         .update(`user`)
@@ -78,7 +88,6 @@ export class GatewayService
         .where('id = :id', { id: verify.sub })
         .execute();
     } catch (error) {
-      console.log(error);
       this.handleDisconnect(client);
     }
   }
