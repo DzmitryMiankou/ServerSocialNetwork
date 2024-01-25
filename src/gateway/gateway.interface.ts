@@ -4,6 +4,10 @@ export interface Message {
   message: string;
   targetId: number;
   pathImg?: null | string;
+  target: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface LeftJoinType {

@@ -172,6 +172,23 @@ export class GatewayService
     @ConnectedSocket() socket: Socket,
   ) {
     socket.emit(`send_message`, message);
+
+    socket.emit(`dialogue_one`, {
+      targetId: message.targetId,
+      sourceId: message.sourceId,
+      createdAt: message.createdAt,
+      target: {
+        firstName: message.target.firstName,
+        lastName: message.target.lastName,
+        activeId: '',
+      },
+      sources: {
+        firstName: '',
+        lastName: '',
+        activeId: '',
+      },
+    });
+
     await this.messagesRepository.save({
       sourceId: message.sourceId,
       targetId: message.targetId,
