@@ -8,6 +8,10 @@ export interface Message {
     firstName: string;
     lastName: string;
   };
+  sources: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface LeftJoinType {

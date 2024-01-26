@@ -173,21 +173,40 @@ export class GatewayService
   ) {
     socket.emit(`send_message`, message);
 
-    socket.emit(`dialogue_one`, {
-      targetId: message.targetId,
-      sourceId: message.sourceId,
-      createdAt: message.createdAt,
-      target: {
-        firstName: message.target.firstName,
-        lastName: message.target.lastName,
-        activeId: '',
-      },
-      sources: {
-        firstName: '',
-        lastName: '',
-        activeId: '',
-      },
-    });
+    const dialoguesRaw: { sourceId: number; targetId: number } =
+      await this.messagesRepository
+        .createQueryBuilder('messages')
+        .select(['sourceId', 'targetId'])
+        .where(
+          'messages.sourceId = :sourceId OR messages.targetId = :sourceId',
+          {
+            sourceId: message.sourceId,
+          },
+        )
+        .where(
+          'messages.sourceId = :targetId OR messages.targetId = :targetId',
+          {
+            targetId: message.targetId,
+          },
+        )
+        .getRawOne();
+
+    !dialoguesRaw &&
+      socket.emit(`dialogue_one`, {
+        sourceId: message.sourceId,
+        targetId: message.targetId,
+        createdAt: message.createdAt,
+        target: {
+          firstName: message.target.firstName,
+          lastName: message.target.lastName,
+          activeId: '',
+        },
+        sources: {
+          firstName: message.sources.firstName,
+          lastName: message.sources.lastName,
+          activeId: '',
+        },
+      });
 
     await this.messagesRepository.save({
       sourceId: message.sourceId,
