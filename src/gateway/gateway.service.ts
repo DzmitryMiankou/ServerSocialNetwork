@@ -129,9 +129,10 @@ export class GatewayService
     });
 
     const newDialogues = {};
-    const filterDialogues = dialogues.filter(({ targetId, sourceId }) => {
-      return !newDialogues[targetId] && (newDialogues[targetId] = sourceId);
-    });
+    const filterDialogues = dialogues.filter(
+      ({ targetId, sourceId }) =>
+        !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
+    );
 
     const arr: DialoguesType[] = [];
     let unique: DialoguesType = filterDialogues[0];
@@ -173,40 +174,21 @@ export class GatewayService
   ) {
     socket.emit(`send_message`, message);
 
-    const dialoguesRaw: { sourceId: number; targetId: number } =
-      await this.messagesRepository
-        .createQueryBuilder('messages')
-        .select(['sourceId', 'targetId'])
-        .where(
-          'messages.sourceId = :sourceId OR messages.targetId = :sourceId',
-          {
-            sourceId: message.sourceId,
-          },
-        )
-        .where(
-          'messages.sourceId = :targetId OR messages.targetId = :targetId',
-          {
-            targetId: message.targetId,
-          },
-        )
-        .getRawOne();
-
-    !dialoguesRaw &&
-      socket.emit(`dialogue_one`, {
-        sourceId: message.sourceId,
-        targetId: message.targetId,
-        createdAt: message.createdAt,
-        target: {
-          firstName: message.target.firstName,
-          lastName: message.target.lastName,
-          activeId: '',
-        },
-        sources: {
-          firstName: message.sources.firstName,
-          lastName: message.sources.lastName,
-          activeId: '',
-        },
-      });
+    socket.emit(`dialogue_one`, {
+      sourceId: message.sourceId,
+      targetId: message.targetId,
+      createdAt: message.createdAt,
+      target: {
+        firstName: message.target.firstName,
+        lastName: message.target.lastName,
+        activeId: '',
+      },
+      sources: {
+        firstName: message.sources.firstName,
+        lastName: message.sources.lastName,
+        activeId: '',
+      },
+    });
 
     await this.messagesRepository.save({
       sourceId: message.sourceId,
