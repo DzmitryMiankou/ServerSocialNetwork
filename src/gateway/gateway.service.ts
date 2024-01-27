@@ -170,9 +170,16 @@ export class GatewayService
     @MessageBody() message: Message,
     @ConnectedSocket() socket: Socket,
   ) {
-    this.io.emit(`send_message`, message);
+    const us2 = await this.userRepositort.findOne({
+      select: { id: true, socketId: true },
+      where: { id: message.targetId },
+    });
 
-    this.io.emit(`dialogue_one`, {
+    socket.emit(`send_message`, message);
+
+    socket.broadcast.to(us2.socketId).emit(`send_message`, message);
+
+    const res = {
       sourceId: message.sourceId,
       targetId: message.targetId,
       createdAt: message.createdAt,
@@ -186,7 +193,10 @@ export class GatewayService
         lastName: message.sources.lastName,
         activeId: '',
       },
-    });
+    };
+
+    socket.emit(`dialogue_one`, res);
+    socket.broadcast.to(us2.socketId).emit(`dialogue_one`, res);
 
     await this.messagesRepository.save({
       sourceId: message.sourceId,
