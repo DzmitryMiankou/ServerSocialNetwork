@@ -107,7 +107,6 @@ export class GatewayService
         targetId: id,
       })
       .orderBy('messages.id', 'DESC')
-      .limit(100)
       .getRawMany();
 
     const dialogues: DialoguesType[] = dialoguesRaw.map((obj) => {
@@ -151,7 +150,6 @@ export class GatewayService
   @SubscribeMessage(`all_messages`)
   async message(@MessageBody() id: number, @ConnectedSocket() socket: Socket) {
     const messagesRaw = await this.messagesRepository.find({
-      take: 100,
       where: [{ sourceId: id }, { targetId: id }],
       relations: { target: true },
     });
@@ -172,9 +170,9 @@ export class GatewayService
     @MessageBody() message: Message,
     @ConnectedSocket() socket: Socket,
   ) {
-    socket.emit(`send_message`, message);
+    this.io.emit(`send_message`, message);
 
-    socket.emit(`dialogue_one`, {
+    this.io.emit(`dialogue_one`, {
       sourceId: message.sourceId,
       targetId: message.targetId,
       createdAt: message.createdAt,
