@@ -18,8 +18,17 @@ import {
   LeftJoinType,
   MessagesType,
   DialoguesType,
-} from './gateway.interface';
+} from './chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
+import { RoomService } from './services/room/room.service';
+
+const enum PathSocket {
+  send = `send_message`,
+  get_all = `all_messages`,
+  dialogue_one = `dialogue_one`,
+  dialogues = `dialogues`,
+  click = `click`,
+}
 
 @WebSocketGateway({
   cors: {
@@ -31,6 +40,7 @@ export class GatewayService
 {
   constructor(
     private JWT: JwtService,
+    private roomService: RoomService,
     private readonly configService: ConfigService,
     @InjectRepository(Messages)
     private readonly messagesRepository: Repository<Messages>,
@@ -39,7 +49,7 @@ export class GatewayService
   ) {}
 
   @WebSocketServer()
-  io: Server = new Server();
+  io: Server;
 
   async handleDisconnect(socket: Socket) {
     //console.log(socket.handshake.auth.Authorization);
@@ -92,7 +102,7 @@ export class GatewayService
     }
   }
 
-  @SubscribeMessage(`dialogues`)
+  @SubscribeMessage(PathSocket.dialogues)
   async dialogues(
     @MessageBody() id: number,
     @ConnectedSocket() socket: Socket,
@@ -117,12 +127,10 @@ export class GatewayService
         target: {
           firstName: obj.targets_firstName,
           lastName: obj.targets_lastName,
-          activeId: obj.targets_activeId,
         },
         sources: {
           firstName: obj.sources_firstName,
           lastName: obj.sources_lastName,
-          activeId: obj.sources_activeId,
         },
       };
     });
@@ -144,10 +152,10 @@ export class GatewayService
         }
     }
 
-    socket.emit('dialogues', arr);
+    socket.emit(PathSocket.dialogues, arr);
   }
 
-  @SubscribeMessage(`all_messages`)
+  @SubscribeMessage(PathSocket.get_all)
   async message(@MessageBody() id: number, @ConnectedSocket() socket: Socket) {
     const messagesRaw = await this.messagesRepository.find({
       where: [{ sourceId: id }, { targetId: id }],
@@ -156,16 +164,21 @@ export class GatewayService
 
     const messages: MessagesType[] = messagesRaw.map((el) => {
       for (const del in el.target)
-        if (del === 'password' || del === 'isActive' || del === 'socketId')
+        if (
+          del === 'password' ||
+          del === 'isActive' ||
+          del === 'socketId' ||
+          del === 'activeId'
+        )
           delete el.target[del];
 
       return { ...el, target: { ...el.target } };
     });
 
-    socket.emit('all_messages', messages);
+    socket.emit(PathSocket.get_all, messages);
   }
 
-  @SubscribeMessage(`send_message`)
+  @SubscribeMessage(PathSocket.send)
   async sendMessage(
     @MessageBody() message: Message,
     @ConnectedSocket() socket: Socket,
@@ -175,9 +188,9 @@ export class GatewayService
       where: { id: message.targetId },
     });
 
-    socket.emit(`send_message`, message);
+    socket.emit(PathSocket.send, message);
 
-    socket.broadcast.to(us2.socketId).emit(`send_message`, message);
+    socket.broadcast.to(us2.socketId).emit(PathSocket.send, message);
 
     const res = {
       sourceId: message.sourceId,
@@ -186,17 +199,15 @@ export class GatewayService
       target: {
         firstName: message.target.firstName,
         lastName: message.target.lastName,
-        activeId: '',
       },
       sources: {
         firstName: message.sources.firstName,
         lastName: message.sources.lastName,
-        activeId: '',
       },
     };
 
-    socket.emit(`dialogue_one`, res);
-    socket.broadcast.to(us2.socketId).emit(`dialogue_one`, res);
+    socket.emit(PathSocket.dialogue_one, res);
+    socket.broadcast.to(us2.socketId).emit(PathSocket.dialogue_one, res);
 
     await this.messagesRepository.save({
       sourceId: message.sourceId,
@@ -206,9 +217,9 @@ export class GatewayService
     });
   }
 
-  @SubscribeMessage(`click`)
+  @SubscribeMessage(PathSocket.click)
   clickHandler(@ConnectedSocket() socket: Socket) {
     console.log('click');
-    socket.emit(`click`);
+    socket.emit(PathSocket.click);
   }
 }

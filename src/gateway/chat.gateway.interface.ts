@@ -1,17 +1,24 @@
+type TargetAndSource = {
+  firstName: string;
+  lastName: string;
+};
+
 export interface Message {
   createdAt: string;
   sourceId: number;
   message: string;
   targetId: number;
   pathImg?: null | string;
-  target: {
-    firstName: string;
-    lastName: string;
-  };
-  sources: {
-    firstName: string;
-    lastName: string;
-  };
+  target: TargetAndSource;
+  sources: TargetAndSource;
+}
+
+export interface DialoguesType {
+  targetId: number;
+  sourceId: number;
+  createdAt: string;
+  target: TargetAndSource;
+  sources: TargetAndSource;
 }
 
 export interface LeftJoinType {
@@ -49,18 +56,5 @@ export interface MessagesType {
     firstName: string;
     lastName: string;
     email: string;
-    activeId: string;
-  };
-}
-
-export interface DialoguesType {
-  targetId: number;
-  sourceId: number;
-  createdAt: string;
-  target: { firstName: string; lastName: string; activeId: string };
-  sources: {
-    firstName: string;
-    lastName: string;
-    activeId: string;
   };
 }
