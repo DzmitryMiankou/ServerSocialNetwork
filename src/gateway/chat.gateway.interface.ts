@@ -1,26 +1,3 @@
-type TargetAndSource = {
-  firstName: string;
-  lastName: string;
-};
-
-export interface Message {
-  createdAt: string;
-  sourceId: number;
-  message: string;
-  targetId: number;
-  pathImg?: null | string;
-  target: TargetAndSource;
-  sources: TargetAndSource;
-}
-
-export interface DialoguesType {
-  targetId: number;
-  sourceId: number;
-  createdAt: string;
-  target: TargetAndSource;
-  sources: TargetAndSource;
-}
-
 export interface LeftJoinType {
   targets_id: number;
   targets_firstName: string;
@@ -43,13 +20,26 @@ export interface LeftJoinType {
   createdAt: string;
 }
 
-export interface MessagesType {
-  id: number;
-  targetId: number;
+type TargetAndSource = {
+  firstName: string;
+  lastName: string;
+};
+
+export interface Message {
+  createdAt: string;
   sourceId: number;
   message: string;
-  pathImg: null | string;
-  createdAt: string;
+  targetId: number;
+  pathImg?: null | string;
+  target: TargetAndSource;
+  sources: TargetAndSource;
+}
+
+export type DialoguesType = Omit<Message, 'pathImg' | 'message'>;
+type TargSourType = Omit<Message, 'target' | 'sources'>;
+
+export interface MessagesType extends TargSourType {
+  id: number;
   updatedAt: null | string;
   target: {
     id: number;
