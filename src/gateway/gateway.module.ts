@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GatewayService } from './chat.gateway';
+import { Gateway } from './chat.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'src/config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,6 +12,6 @@ import { RoomService } from './services/room/room.service';
     JwtModule.registerAsync({ ...config }),
     TypeOrmModule.forFeature([Messages, User]),
   ],
-  providers: [GatewayService, RoomService],
+  providers: [Gateway, RoomService],
 })
 export class GatewayModule {}

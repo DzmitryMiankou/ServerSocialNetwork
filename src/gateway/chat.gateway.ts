@@ -35,9 +35,7 @@ const enum PathSocket {
     origin: 'http://localhost:3000',
   },
 })
-export class GatewayService
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private JWT: JwtService,
     private roomService: RoomService,
@@ -141,7 +139,7 @@ export class GatewayService
         !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
     );
 
-    const arr: DialoguesType[] = [];
+    const arr: typeof dialogues = [];
     let unique: DialoguesType = filterDialogues[0];
     for (const i in filterDialogues) {
       !arr[0] && arr.push(filterDialogues[0]);
@@ -162,7 +160,7 @@ export class GatewayService
       relations: { target: true },
     });
 
-    const messages: MessagesType[] = messagesRaw.map((el) => {
+    const messages: Readonly<MessagesType[]> = messagesRaw.map((el) => {
       for (const del in el.target)
         if (
           del === 'password' ||
