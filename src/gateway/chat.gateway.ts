@@ -50,8 +50,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   io: Server;
 
   async handleDisconnect(socket: Socket) {
-    //console.log(socket.handshake.auth.Authorization);
-
     await this.userRepositort
       .createQueryBuilder()
       .update(`user`)
@@ -60,6 +58,8 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       })
       .where('socketId = :socketId', { socketId: socket.id })
       .execute();
+
+    socket.disconnect();
   }
 
   async handleConnection(client: Socket) {
@@ -68,25 +68,19 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         'Bearer=',
         '',
       ) ?? null) as string | null;
-      if (!access_token)
-        return this.io.use((socket, next) => {
-          const err: any = new Error('not authorized');
-          err.data = { content: 'Please retry later' };
-          next(err);
-        });
+      if (!access_token) return this.handleDisconnect(client);
 
-      const verify = this.JWT.verify(access_token, {
+      const verify = await this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      if (!verify)
-        return this.io.use((socket, next) => {
-          const err: any = new Error('not authorized');
-          err.data = { content: 'Please retry later' };
-          next(err);
-        });
+      const user = await this.userRepositort.findOne({
+        where: { id: verify.sub },
+      });
 
-      //console.log(client.handshake.auth.Authorization);
+      if (!user) return this.handleDisconnect(client);
+      client.data.user = user;
+
       await this.userRepositort
         .createQueryBuilder()
         .update(`user`)
