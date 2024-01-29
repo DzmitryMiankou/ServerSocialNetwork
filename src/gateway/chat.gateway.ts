@@ -184,7 +184,11 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     socket.broadcast.to(us2.socketId).emit(PathSocket.send, message);
 
-    const res = {
+    interface DialogueType extends DialoguesType {
+      sourceId: number;
+    }
+
+    const dialogue: DialogueType = {
       sourceId: message.sourceId,
       targetId: message.targetId,
       createdAt: message.createdAt,
@@ -198,8 +202,8 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       },
     };
 
-    socket.emit(PathSocket.dialogue_one, res);
-    socket.broadcast.to(us2.socketId).emit(PathSocket.dialogue_one, res);
+    socket.emit(PathSocket.dialogue_one, dialogue);
+    socket.broadcast.to(us2.socketId).emit(PathSocket.dialogue_one, dialogue);
 
     await this.messagesRepository.save({
       sourceId: message.sourceId,
