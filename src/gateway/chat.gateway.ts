@@ -21,6 +21,8 @@ import {
 } from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
+import { RoomI } from './interfaces/room.interfaces';
+import { UnauthorizedException } from '@nestjs/common';
 
 const enum PathSocket {
   send = `send_message`,
@@ -59,6 +61,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       .where('socketId = :socketId', { socketId: socket.id })
       .execute();
 
+    socket.emit('error', new UnauthorizedException());
     socket.disconnect();
   }
 
@@ -80,6 +83,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (!user) return this.handleDisconnect(client);
       client.data.user = user;
+
       const rooms = this.roomService.getRoomsForUser(user.id, {
         page: 1,
         limit: 100,
@@ -98,6 +102,11 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error) {
       this.handleDisconnect(client);
     }
+  }
+
+  @SubscribeMessage('createRoom')
+  async onCreateRoom(socket: Socket, room: RoomI) {
+    return this.roomService.createRoom(room, socket.data.user);
   }
 
   @SubscribeMessage(PathSocket.dialogues)
