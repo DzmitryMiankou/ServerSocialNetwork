@@ -18,7 +18,7 @@ import {
   LeftJoinType,
   MessagesType,
   DialoguesType,
-} from './chat.gateway.interface';
+} from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 
@@ -80,6 +80,12 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (!user) return this.handleDisconnect(client);
       client.data.user = user;
+      const rooms = this.roomService.getRoomsForUser(user.id, {
+        page: 1,
+        limit: 100,
+      });
+
+      this.io.to(client.id).emit('rooms', rooms);
 
       await this.userRepositort
         .createQueryBuilder()

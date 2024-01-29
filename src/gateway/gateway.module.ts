@@ -6,11 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Messages } from './entity/messages.entity';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
+import { Room } from './entity/room.entity';
 
 @Module({
   imports: [
     JwtModule.registerAsync({ ...config }),
-    TypeOrmModule.forFeature([Messages, User]),
+    TypeOrmModule.forFeature([Messages, User, Room]),
   ],
   providers: [Gateway, RoomService],
 })
