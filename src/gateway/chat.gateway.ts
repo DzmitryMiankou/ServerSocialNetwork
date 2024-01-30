@@ -129,28 +129,11 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       select: { id: true, socketId: true },
       where: { id: message.targetId },
     });
-
     socket.emit(PathSocket.send_mess, message);
-
     socket.broadcast.to(us2.socketId).emit(PathSocket.send_mess, message);
 
-    interface DialogueType extends DialoguesType {
-      sourceId: number;
-    }
-
-    const dialogue: DialogueType = {
-      sourceId: message.sourceId,
-      targetId: message.targetId,
-      createdAt: message.createdAt,
-      target: {
-        firstName: message.target.firstName,
-        lastName: message.target.lastName,
-      },
-      sources: {
-        firstName: message.sources.firstName,
-        lastName: message.sources.lastName,
-      },
-    };
+    const dialogue: DialoguesType =
+      this.dialoguesService.sendDialogues(message);
 
     socket.emit(PathSocket.dialogue_one, dialogue);
     socket.broadcast.to(us2.socketId).emit(PathSocket.dialogue_one, dialogue);

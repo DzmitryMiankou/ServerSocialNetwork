@@ -4,6 +4,7 @@ import { Messages } from 'src/gateway/entity/messages.entity';
 import {
   DialoguesType,
   LeftJoinType,
+  Message,
 } from 'src/gateway/interfaces/chat.gateway.interface';
 import { Repository } from 'typeorm';
 
@@ -30,21 +31,41 @@ export class DialoguesService {
     return this.fillterDialogues(dialoguesRaw);
   }
 
+  sendDialogues(message: Message): DialoguesType {
+    return this.modelDialogue(message);
+  }
+
+  private modelDialogue(message: Message | LeftJoinType): DialoguesType {
+    return {
+      sourceId: message.sourceId,
+      targetId: message.targetId,
+      createdAt: message.createdAt,
+      target:
+        'target' in message
+          ? {
+              firstName: message.target.firstName,
+              lastName: message.target.lastName,
+            }
+          : {
+              firstName: message.targets_firstName,
+              lastName: message.targets_lastName,
+            },
+      sources:
+        'target' in message
+          ? {
+              firstName: message.sources.firstName,
+              lastName: message.sources.lastName,
+            }
+          : {
+              firstName: message.sources_firstName,
+              lastName: message.sources_lastName,
+            },
+    };
+  }
+
   private fillterDialogues(dialoguesRaw: LeftJoinType[]): DialoguesType[] {
     const dialogues: DialoguesType[] = dialoguesRaw.map((obj) => {
-      return {
-        targetId: obj.targetId,
-        sourceId: obj.sourceId,
-        createdAt: obj.createdAt,
-        target: {
-          firstName: obj.targets_firstName,
-          lastName: obj.targets_lastName,
-        },
-        sources: {
-          firstName: obj.sources_firstName,
-          lastName: obj.sources_lastName,
-        },
-      };
+      return this.modelDialogue(obj);
     });
 
     const newDialogues = {};
