@@ -8,12 +8,13 @@ import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { Room } from './entity/room.entity';
 import { MessagesService } from './services/messages/messages.service';
+import { DialoguesService } from './services/dialogues/dialogues.service';
 
 @Module({
   imports: [
     JwtModule.registerAsync({ ...config }),
     TypeOrmModule.forFeature([Messages, User, Room]),
   ],
-  providers: [Gateway, RoomService, MessagesService],
+  providers: [Gateway, RoomService, MessagesService, DialoguesService],
 })
 export class GatewayModule {}

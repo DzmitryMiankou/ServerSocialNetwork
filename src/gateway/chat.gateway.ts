@@ -11,21 +11,17 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Messages } from './entity/messages.entity';
 import { Repository } from 'typeorm';
-import {
-  Message,
-  LeftJoinType,
-  DialoguesType,
-} from './interfaces/chat.gateway.interface';
+import { Message, DialoguesType } from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { RoomI } from './interfaces/room.interfaces';
 import { UnauthorizedException } from '@nestjs/common';
 import { MessagesService } from './services/messages/messages.service';
+import { DialoguesService } from './services/dialogues/dialogues.service';
 
 const enum PathSocket {
-  send = `send_message`,
+  send_mess = `send_message`,
   get_all_mess = `all_messages`,
   dialogue_one = `dialogue_one`,
   dialogues = `dialogues`,
@@ -41,10 +37,9 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private JWT: JwtService,
     private roomService: RoomService,
+    private dialoguesService: DialoguesService,
     private messagesService: MessagesService,
     private readonly configService: ConfigService,
-    @InjectRepository(Messages)
-    private readonly messagesRepository: Repository<Messages>,
     @InjectRepository(User)
     private readonly userRepositort: Repository<User>,
   ) {}
@@ -115,62 +110,17 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() id: number,
     @ConnectedSocket() socket: Socket,
   ) {
-    const dialoguesRaw: LeftJoinType[] = await this.messagesRepository
-      .createQueryBuilder('messages')
-      .select(['targetId', 'sourceId', 'createdAt'])
-      .leftJoinAndSelect('messages.target', 'targets')
-      .leftJoinAndSelect('messages.source', 'sources')
-      .where('messages.sourceId = :sourceId OR messages.targetId = :targetId', {
-        sourceId: id,
-        targetId: id,
-      })
-      .orderBy('messages.id', 'DESC')
-      .getRawMany();
-
-    const dialogues: DialoguesType[] = dialoguesRaw.map((obj) => {
-      return {
-        targetId: obj.targetId,
-        sourceId: obj.sourceId,
-        createdAt: obj.createdAt,
-        target: {
-          firstName: obj.targets_firstName,
-          lastName: obj.targets_lastName,
-        },
-        sources: {
-          firstName: obj.sources_firstName,
-          lastName: obj.sources_lastName,
-        },
-      };
-    });
-
-    const newDialogues = {};
-    const filterDialogues = dialogues.filter(
-      ({ targetId, sourceId }) =>
-        !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
-    );
-
-    const arr: typeof dialogues = [];
-    let unique: DialoguesType = filterDialogues[0];
-    for (const i in filterDialogues) {
-      !arr[0] && arr.push(filterDialogues[0]);
-      if (filterDialogues[+i + 1]?.targetId !== unique.sourceId)
-        if (filterDialogues[+i + 1]) {
-          unique = filterDialogues[+i + 1];
-          arr.push(filterDialogues[+i + 1]);
-        }
-    }
-
-    socket.emit(PathSocket.dialogues, arr);
+    const response = await this.dialoguesService.getDialogues(id);
+    socket.emit(PathSocket.dialogues, response);
   }
 
   @SubscribeMessage(PathSocket.get_all_mess)
   async message(@MessageBody() id: number, @ConnectedSocket() socket: Socket) {
     const response = await this.messagesService.findMessages(id);
-
     socket.emit(PathSocket.get_all_mess, response);
   }
 
-  @SubscribeMessage(PathSocket.send)
+  @SubscribeMessage(PathSocket.send_mess)
   async sendMessage(
     @MessageBody() message: Message,
     @ConnectedSocket() socket: Socket,
@@ -180,9 +130,9 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       where: { id: message.targetId },
     });
 
-    socket.emit(PathSocket.send, message);
+    socket.emit(PathSocket.send_mess, message);
 
-    socket.broadcast.to(us2.socketId).emit(PathSocket.send, message);
+    socket.broadcast.to(us2.socketId).emit(PathSocket.send_mess, message);
 
     interface DialogueType extends DialoguesType {
       sourceId: number;
@@ -205,12 +155,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.emit(PathSocket.dialogue_one, dialogue);
     socket.broadcast.to(us2.socketId).emit(PathSocket.dialogue_one, dialogue);
 
-    await this.messagesRepository.save({
-      sourceId: message.sourceId,
-      targetId: message.targetId,
-      message: message.message,
-      createdAt: message.createdAt,
-    });
+    await this.messagesService.saveMessage(message);
   }
 
   @SubscribeMessage(PathSocket.click)
