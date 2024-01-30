@@ -1,7 +1,7 @@
 import { User } from 'src/authentication/authentication.entity';
 
 export interface RoomI {
-  id: number;
+  readonly id: number;
   name: string;
   description: string;
   createdAt: string;

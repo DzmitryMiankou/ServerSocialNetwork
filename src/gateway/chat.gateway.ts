@@ -16,17 +16,17 @@ import { Repository } from 'typeorm';
 import {
   Message,
   LeftJoinType,
-  MessagesType,
   DialoguesType,
 } from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { RoomI } from './interfaces/room.interfaces';
 import { UnauthorizedException } from '@nestjs/common';
+import { MessagesService } from './services/messages/messages.service';
 
 const enum PathSocket {
   send = `send_message`,
-  get_all = `all_messages`,
+  get_all_mess = `all_messages`,
   dialogue_one = `dialogue_one`,
   dialogues = `dialogues`,
   click = `click`,
@@ -41,6 +41,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private JWT: JwtService,
     private roomService: RoomService,
+    private messagesService: MessagesService,
     private readonly configService: ConfigService,
     @InjectRepository(Messages)
     private readonly messagesRepository: Repository<Messages>,
@@ -162,27 +163,11 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.emit(PathSocket.dialogues, arr);
   }
 
-  @SubscribeMessage(PathSocket.get_all)
+  @SubscribeMessage(PathSocket.get_all_mess)
   async message(@MessageBody() id: number, @ConnectedSocket() socket: Socket) {
-    const messagesRaw = await this.messagesRepository.find({
-      where: [{ sourceId: id }, { targetId: id }],
-      relations: { target: true },
-    });
+    const response = await this.messagesService.findMessages(id);
 
-    const messages: Readonly<MessagesType[]> = messagesRaw.map((el) => {
-      for (const del in el.target)
-        if (
-          del === 'password' ||
-          del === 'isActive' ||
-          del === 'socketId' ||
-          del === 'activeId'
-        )
-          delete el.target[del];
-
-      return { ...el, target: { ...el.target } };
-    });
-
-    socket.emit(PathSocket.get_all, messages);
+    socket.emit(PathSocket.get_all_mess, response);
   }
 
   @SubscribeMessage(PathSocket.send)

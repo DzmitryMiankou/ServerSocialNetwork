@@ -7,12 +7,13 @@ import { Messages } from './entity/messages.entity';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { Room } from './entity/room.entity';
+import { MessagesService } from './services/messages/messages.service';
 
 @Module({
   imports: [
     JwtModule.registerAsync({ ...config }),
     TypeOrmModule.forFeature([Messages, User, Room]),
   ],
-  providers: [Gateway, RoomService],
+  providers: [Gateway, RoomService, MessagesService],
 })
 export class GatewayModule {}
