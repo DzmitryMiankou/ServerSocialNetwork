@@ -32,6 +32,35 @@ export class MessagesService {
     });
   }
 
+  async deleteMessage(message: {
+    targetId: number;
+    sourceId: number;
+  }): Promise<void> {
+    try {
+      await this.messagesRepository
+        .createQueryBuilder(`messages`)
+        .delete()
+        .from(Messages)
+        .where(
+          'messages.sourceId = :sourceId AND messages.targetId = :targetId',
+          {
+            sourceId: message.sourceId,
+            targetId: message.targetId,
+          },
+        )
+        .orWhere(
+          'messages.sourceId = :targetId AND messages.targetId = :sourceId',
+          {
+            sourceId: message.sourceId,
+            targetId: message.targetId,
+          },
+        )
+        .execute();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   private fillterMessages(
     messagesRaw: MessagesType[],
   ): Readonly<MessagesType[]> {

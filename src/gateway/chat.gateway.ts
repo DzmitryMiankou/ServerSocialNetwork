@@ -141,6 +141,14 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     await this.messagesService.saveMessage(message);
   }
 
+  @SubscribeMessage('delete_messages')
+  async deleteMessage(
+    @MessageBody() dialogue: { targetId: number; sourceId: number },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    await this.messagesService.deleteMessage(dialogue);
+  }
+
   @SubscribeMessage(PathSocket.click)
   clickHandler(@ConnectedSocket() socket: Socket) {
     console.log('click');
