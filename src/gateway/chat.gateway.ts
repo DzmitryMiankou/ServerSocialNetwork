@@ -102,7 +102,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('createRoom')
   async onCreateRoom(socket: Socket, room: RoomI) {
-    console.log(room);
+    console.log(room.users);
     return this.roomService.createRoom(room, socket.data.user);
   }
 

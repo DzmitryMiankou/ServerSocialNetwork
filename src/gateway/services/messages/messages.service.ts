@@ -28,7 +28,6 @@ export class MessagesService {
       sourceId: message.sourceId,
       targetId: message.targetId,
       message: message.message,
-      createdAt: new Date(message.createdAt),
     });
   }
 

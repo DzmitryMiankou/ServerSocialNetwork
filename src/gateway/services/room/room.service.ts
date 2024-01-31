@@ -25,13 +25,19 @@ export class RoomService {
   async getRoomsForUser(
     userId: number,
     options: IPaginationOptions,
-  ): Promise<Pagination<Room>> {
-    const query = this.roomRepository
-      .createQueryBuilder('room')
-      .leftJoin('room.users', 'user')
-      .where('user.id = :userId', { userId });
+  ): Promise<Pagination<RoomI>> {
+    try {
+      const query = this.roomRepository
+        .createQueryBuilder('room')
+        .leftJoin('room.users', 'user')
+        .where('user.id = :userId', { userId })
+        .leftJoinAndSelect('room.users', 'all_user')
+        .orderBy('room.createdAt', 'DESC');
 
-    return paginate(query, options);
+      return paginate(query, options);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async addCreatorToRoom(room: RoomI, creator: User): Promise<RoomI> {
