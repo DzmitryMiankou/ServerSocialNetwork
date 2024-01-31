@@ -28,7 +28,7 @@ export class MessagesService {
       sourceId: message.sourceId,
       targetId: message.targetId,
       message: message.message,
-      createdAt: message.createdAt,
+      createdAt: new Date(message.createdAt),
     });
   }
 

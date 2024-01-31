@@ -80,7 +80,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!user) return this.handleDisconnect(client);
       client.data.user = user;
 
-      const rooms = this.roomService.getRoomsForUser(user.id, {
+      const rooms = await this.roomService.getRoomsForUser(user.id, {
         page: 1,
         limit: 100,
       });
@@ -102,6 +102,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('createRoom')
   async onCreateRoom(socket: Socket, room: RoomI) {
+    console.log(room);
     return this.roomService.createRoom(room, socket.data.user);
   }
 
@@ -151,7 +152,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage(PathSocket.click)
   clickHandler(@ConnectedSocket() socket: Socket) {
-    console.log('click');
+    //console.log('click');
     socket.emit(PathSocket.click);
   }
 }

@@ -17,7 +17,7 @@ export interface LeftJoinType {
   sources_socketId: null | string;
   targetId: number;
   sourceId: number;
-  createdAt: string;
+  createdAt: Date;
 }
 
 type TargetAndSource = {
@@ -26,7 +26,7 @@ type TargetAndSource = {
 };
 
 export interface Message {
-  createdAt: string;
+  createdAt: Date;
   sourceId: number;
   message: string;
   targetId: number;
@@ -40,7 +40,7 @@ type TargSourType = Omit<Message, 'target' | 'sources'>;
 
 export interface MessagesType extends TargSourType {
   id: number;
-  updatedAt: null | string;
+  updatedAt: null | Date;
   target: {
     id: number;
     firstName: string;
