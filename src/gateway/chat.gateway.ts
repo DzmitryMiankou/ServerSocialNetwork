@@ -63,7 +63,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       ) ?? null) as string | null;
       if (!access_token) return this.handleDisconnect(client);
 
-      const verify = await this.JWT.verify(access_token, {
+      const verify: { sub: number } = await this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
@@ -99,6 +99,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         limit: 100,
       });
       for (const connection of connections) {
+        if (connection.socketId === 'Disconnect') return;
         this.io.to(connection.socketId).emit('rooms', rooms);
       }
     }
