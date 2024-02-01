@@ -19,6 +19,7 @@ import { RoomI } from './interfaces/room.interfaces';
 import { UnauthorizedException } from '@nestjs/common';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
+import { ConnectedService } from './services/connected/connected.service';
 
 const enum PathSocket {
   send_mess = `send_message`,
@@ -37,6 +38,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private JWT: JwtService,
     private roomService: RoomService,
+    private connectedService: ConnectedService,
     private dialoguesService: DialoguesService,
     private messagesService: MessagesService,
     private readonly configService: ConfigService,
@@ -48,15 +50,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   io: Server;
 
   async handleDisconnect(socket: Socket) {
-    await this.userRepositort
-      .createQueryBuilder()
-      .update(`user`)
-      .set({
-        socketId: 'Disconnect',
-      })
-      .where('socketId = :socketId', { socketId: socket.id })
-      .execute();
-
+    await this.connectedService.deleteByIdSocket(socket.id);
     socket.emit('error', new UnauthorizedException());
     socket.disconnect();
   }
@@ -73,28 +67,17 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      const user = await this.userRepositort.findOne({
-        where: { id: verify.sub },
-      });
+      const user = await this.connectedService.findByUser(verify.sub);
 
       if (!user) return this.handleDisconnect(client);
       client.data.user = user;
-
-      const rooms = await this.roomService.getRoomsForUser(user.id, {
+      await this.connectedService.saveSocketId(client.id, verify.sub);
+      const rooms = await this.roomService.getRoomsForUser(user[0].id, {
         page: 1,
         limit: 100,
       });
 
-      this.io.to(client.id).emit('rooms', rooms);
-
-      await this.userRepositort
-        .createQueryBuilder()
-        .update(`user`)
-        .set({
-          socketId: client.id,
-        })
-        .where('id = :id', { id: verify.sub })
-        .execute();
+      return this.io.to(client.id).emit('rooms', rooms);
     } catch (error) {
       this.handleDisconnect(client);
     }
@@ -102,8 +85,23 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('createRoom')
   async onCreateRoom(socket: Socket, room: RoomI) {
-    console.log(room.users);
-    return this.roomService.createRoom(room, socket.data.user);
+    const createdRoom: RoomI = await this.roomService.createRoom(
+      room,
+      socket.data.user,
+    );
+    for (const user of createdRoom.users) {
+      const connections: User[] = await this.connectedService.findByUser(
+        user.id,
+      );
+
+      const rooms = await this.roomService.getRoomsForUser(user.id, {
+        page: 1,
+        limit: 100,
+      });
+      for (const connection of connections) {
+        this.io.to(connection.socketId).emit('rooms', rooms);
+      }
+    }
   }
 
   @SubscribeMessage(PathSocket.dialogues)

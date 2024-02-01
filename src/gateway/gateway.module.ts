@@ -9,12 +9,13 @@ import { RoomService } from './services/room/room.service';
 import { Room } from './entity/room.entity';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
+import { ConnectedService } from './services/connected/connected.service';
 
 @Module({
   imports: [
     JwtModule.registerAsync({ ...config }),
     TypeOrmModule.forFeature([Messages, User, Room]),
   ],
-  providers: [Gateway, RoomService, MessagesService, DialoguesService],
+  providers: [Gateway, RoomService, MessagesService, DialoguesService, ConnectedService],
 })
 export class GatewayModule {}
