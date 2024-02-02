@@ -22,6 +22,13 @@ export class RoomService {
     return this.roomRepository.save(newRoom);
   }
 
+  async getRoom(roomId: number) {
+    return await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: { users: true },
+    });
+  }
+
   async getRoomsForUser(
     userId: number,
     options: IPaginationOptions,

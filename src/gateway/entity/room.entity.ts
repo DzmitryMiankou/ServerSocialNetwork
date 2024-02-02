@@ -30,7 +30,7 @@ export class Room {
   joinedUsers: JoinedRoom[];
 
   @OneToMany(() => Messages, (joinedRooms) => joinedRooms.room)
-  messages: Messages;
+  messages: Messages[];
 
   @CreateDateColumn()
   createdAt: Date;
