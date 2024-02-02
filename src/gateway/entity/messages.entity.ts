@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Room } from './room.entity';
 
 @Entity()
 export class Messages {
@@ -36,8 +38,14 @@ export class Messages {
   updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn()
   target: User;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn()
   source: User;
+
+  @ManyToOne(() => Room, (user) => user.messages)
+  @JoinColumn()
+  room: Room;
 }

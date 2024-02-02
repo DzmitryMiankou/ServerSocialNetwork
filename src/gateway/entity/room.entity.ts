@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { JoinedRoom } from './joined-room.entity';
+import { Messages } from './messages.entity';
 
 @Entity()
 export class Room {
@@ -27,6 +28,9 @@ export class Room {
 
   @OneToMany(() => JoinedRoom, (joinedRooms) => joinedRooms.room)
   joinedUsers: JoinedRoom[];
+
+  @OneToMany(() => Messages, (joinedRooms) => joinedRooms.room)
+  messages: Messages;
 
   @CreateDateColumn()
   createdAt: Date;
