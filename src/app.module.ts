@@ -22,6 +22,7 @@ import { ContactsModule } from './contacts/contacts.module';
 import { Contacts } from './contacts/contacts.entity/contacts.entity';
 import { Messages } from './gateway/entity/messages.entity';
 import { Room } from './gateway/entity/room.entity';
+import { JoinedRoom } from './gateway/entity/joined-room.entity';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { Room } from './gateway/entity/room.entity';
         username: configService.get<string>(`USERNAME_DB`),
         password: configService.get<string>(`PASSWORD_DB`),
         database: configService.get<string>(`DATABASE_DB`),
-        entities: [User, Login, Contacts, Messages, Room],
+        entities: [User, Login, Contacts, Messages, Room, JoinedRoom],
         synchronize: true,
       }),
       inject: [ConfigService],

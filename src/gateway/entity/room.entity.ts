@@ -5,8 +5,10 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { JoinedRoom } from './joined-room.entity';
 
 @Entity()
 export class Room {
@@ -22,6 +24,9 @@ export class Room {
   @ManyToMany(() => User)
   @JoinTable()
   users: User[];
+
+  @OneToMany(() => JoinedRoom, (joinedRooms) => joinedRooms.room)
+  joinedUsers: JoinedRoom[];
 
   @CreateDateColumn()
   createdAt: Date;
