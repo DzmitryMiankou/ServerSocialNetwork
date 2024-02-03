@@ -16,7 +16,6 @@ import { Message, DialoguesType } from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { RoomI } from './interfaces/room.interfaces';
-import { UnauthorizedException } from '@nestjs/common';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
 import { ConnectedService } from './services/connected/connected.service';
@@ -53,25 +52,25 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(socket: Socket) {
     await this.connectedService.deleteByIdSocket(socket.id);
-    socket.emit('error', new UnauthorizedException());
     socket.disconnect();
   }
 
   async handleConnection(client: Socket) {
     try {
-      const access_token = (client.handshake.auth.Authorization.replace(
+      const access_token = (await (client.handshake.auth.Authorization.replace(
         'Bearer=',
         '',
-      ) ?? null) as string | null;
+      ) ?? null)) as string | null;
       if (!access_token) return this.handleDisconnect(client);
 
       const verify: { sub: number } = await this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
-      const user = await this.connectedService.findByUser(verify.sub);
+      const user = await this.connectedService.findByUser(verify?.sub);
 
       if (!user) return this.handleDisconnect(client);
+
       client.data.user = user;
       await this.connectedService.saveSocketId(client.id, verify.sub);
       const rooms = await this.roomService.getRoomsForUser(user[0].id, {
@@ -86,25 +85,26 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('createRoom')
-  async onCreateRoom(socket: Socket, room: RoomI) {
-    const createdRoom: RoomI = await this.roomService.createRoom(
-      room,
-      socket.data.user,
+  async onCreateRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() room: RoomI,
+  ) {
+    const createdRoom: RoomI = await this.roomService.createRoom(room);
+    console.log(createdRoom);
+    const connections: User[] = await this.connectedService.findByUser(
+      createdRoom.users[0].id,
     );
-    for (const user of createdRoom.users) {
-      const connections: User[] = await this.connectedService.findByUser(
-        user.id,
-      );
 
-      const rooms = await this.roomService.getRoomsForUser(user.id, {
+    const rooms = await this.roomService.getRoomsForUser(
+      createdRoom.users[0].id,
+      {
         page: 1,
         limit: 100,
-      });
-      for (const connection of connections) {
-        if (connection.socketId === 'Disconnect') return;
-        this.io.to(connection.socketId).emit('rooms', rooms);
-      }
-    }
+      },
+    );
+
+    if (connections[0].socketId === 'Disconnect') return;
+    this.io.to(connections[0].socketId).emit('rooms', rooms);
   }
 
   @SubscribeMessage('joinRoom')
