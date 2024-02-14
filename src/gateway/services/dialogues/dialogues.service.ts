@@ -84,7 +84,6 @@ export class DialoguesService {
           arr.push(filterDialogues[+i + 1]);
         }
     }
-    console.log(arr);
     return arr;
   }
 }

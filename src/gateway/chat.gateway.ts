@@ -52,6 +52,14 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(socket: Socket) {
     await this.connectedService.deleteByIdSocket(socket.id);
+    const accessToken = await this.JWT.signAsync(
+      { sub: 1, username: 'Dzmitry' },
+      {
+        expiresIn: '10m',
+        secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
+      },
+    );
+    socket.emit('refresh', `${accessToken}`);
     socket.disconnect();
   }
 
@@ -70,8 +78,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.connectedService.findByUser(verify?.sub);
 
       if (!user) return this.handleDisconnect(client);
-
-      client.data.user = user;
       await this.connectedService.saveSocketId(client.id, verify.sub);
       const rooms = await this.roomService.getRoomsForUser(user[0].id, {
         page: 1,
@@ -80,6 +86,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return this.io.to(client.id).emit('rooms', rooms);
     } catch (error) {
+      console.log(error);
       this.handleDisconnect(client);
     }
   }
@@ -89,22 +96,24 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
     @MessageBody() room: RoomI,
   ) {
-    const createdRoom: RoomI = await this.roomService.createRoom(room);
-    console.log(createdRoom);
-    const connections: User[] = await this.connectedService.findByUser(
-      createdRoom.users[0].id,
-    );
+    console.log(room);
+    try {
+      const createdRoom: RoomI = await this.roomService.createRoom(room);
+      const connections: User[] = await this.connectedService.findByUser(
+        createdRoom.users[0].id,
+      );
 
-    const rooms = await this.roomService.getRoomsForUser(
-      createdRoom.users[0].id,
-      {
-        page: 1,
-        limit: 100,
-      },
-    );
-
-    if (connections[0].socketId === 'Disconnect') return;
-    this.io.to(connections[0].socketId).emit('rooms', rooms);
+      const rooms = await this.roomService.getRoomsForUser(
+        createdRoom.users[0].id,
+        {
+          page: 1,
+          limit: 100,
+        },
+      );
+      this.io.to(connections[0].socketId).emit('rooms', rooms);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @SubscribeMessage('joinRoom')
