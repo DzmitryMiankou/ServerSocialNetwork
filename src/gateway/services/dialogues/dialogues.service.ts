@@ -18,7 +18,7 @@ export class DialoguesService {
   async getDialogues(id: number): Promise<DialoguesType[]> {
     const dialoguesRaw: LeftJoinType[] = await this.messagesRepository
       .createQueryBuilder('messages')
-      .select(['targetId', 'sourceId', 'createdAt'])
+      .select(['targetId', 'sourceId', 'createdAt', 'message'])
       .leftJoinAndSelect('messages.target', 'targets')
       .leftJoinAndSelect('messages.source', 'sources')
       .where('messages.sourceId = :sourceId OR messages.targetId = :targetId', {
@@ -27,7 +27,6 @@ export class DialoguesService {
       })
       .orderBy('messages.id', 'DESC')
       .getRawMany();
-
     return this.fillterDialogues(dialoguesRaw);
   }
 
@@ -40,6 +39,7 @@ export class DialoguesService {
       sourceId: message.sourceId,
       targetId: message.targetId,
       createdAt: message.createdAt,
+      message: message.message,
       target:
         'target' in message
           ? {

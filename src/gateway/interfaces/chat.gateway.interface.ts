@@ -18,6 +18,7 @@ export interface LeftJoinType {
   targetId: number;
   sourceId: number;
   createdAt: Date;
+  message: string;
 }
 
 type TargetAndSource = {
@@ -35,7 +36,7 @@ export interface Message {
   sources: TargetAndSource;
 }
 
-export type DialoguesType = Omit<Message, 'pathImg' | 'message'>;
+export type DialoguesType = Omit<Message, 'pathImg'>;
 type TargSourType = Omit<Message, 'target' | 'sources'>;
 
 export interface MessagesType extends TargSourType {
