@@ -48,3 +48,5 @@ export interface MessagesType extends TargSourType {
     email: string;
   };
 }
+
+export type TokenType = { sub: number; username: string };

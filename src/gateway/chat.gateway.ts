@@ -12,7 +12,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Repository } from 'typeorm';
-import { Message, DialoguesType } from './interfaces/chat.gateway.interface';
+import {
+  Message,
+  DialoguesType,
+  TokenType,
+} from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
 import { RoomService } from './services/room/room.service';
 import { RoomI } from './interfaces/room.interfaces';
@@ -57,12 +61,9 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
         '',
       );
 
-      const verify: { sub: number; username: string } = await this.JWT.verify(
-        refresh_token,
-        {
-          secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
-        },
-      );
+      const verify: TokenType = await this.JWT.verify(refresh_token, {
+        secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+      });
 
       const accessToken = await this.JWT.signAsync(
         { sub: verify.sub, username: verify.username },
@@ -86,7 +87,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
       ) ?? null)) as string | null;
       if (!access_token) return this.handleDisconnect(client);
 
-      const verify: { sub: number } = await this.JWT.verify(access_token, {
+      const verify: TokenType = await this.JWT.verify(access_token, {
         secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
       });
 
