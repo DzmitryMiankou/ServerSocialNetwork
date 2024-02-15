@@ -23,7 +23,6 @@ import { RoomI } from './interfaces/room.interfaces';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
 import { ConnectedService } from './services/connected/connected.service';
-import { JoinedRoomService } from './services/joined-room/joined-room.service';
 
 const enum PathSocket {
   send_mess = `send_message`,
@@ -45,7 +44,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     private connectedService: ConnectedService,
     private dialoguesService: DialoguesService,
     private messagesService: MessagesService,
-    private joinedService: JoinedRoomService,
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly userRepositort: Repository<User>,
@@ -129,15 +127,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  @SubscribeMessage('joinRoom')
-  async onJoinRoom(@ConnectedSocket() socket: Socket, room: RoomI) {
-    await this.joinedService.create({
-      socketId: socket.id,
-      user: socket.data.user,
-      room,
-    });
   }
 
   @SubscribeMessage(PathSocket.dialogues)

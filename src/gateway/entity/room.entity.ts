@@ -8,7 +8,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { JoinedRoom } from './joined-room.entity';
 import { Messages } from './messages.entity';
 
 @Entity()
@@ -25,9 +24,6 @@ export class Room {
   @ManyToMany(() => User)
   @JoinTable()
   users: User[];
-
-  @OneToMany(() => JoinedRoom, (joinedRooms) => joinedRooms.room)
-  joinedUsers: JoinedRoom[];
 
   @OneToMany(() => Messages, (joinedRooms) => joinedRooms.room)
   messages: Messages[];

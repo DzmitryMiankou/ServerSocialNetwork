@@ -9,7 +9,6 @@ import { IsEmail, IsString, MinLength } from 'class-validator';
 import { Contacts } from 'src/contacts/contacts.entity/contacts.entity';
 import { Messages } from 'src/gateway/entity/messages.entity';
 import { Room } from 'src/gateway/entity/room.entity';
-import { JoinedRoom } from 'src/gateway/entity/joined-room.entity';
 
 enum UserRole {
   ADMIN = 'admin',
@@ -77,7 +76,4 @@ export class User {
 
   @OneToMany(() => Messages, (photo) => photo.source)
   sources: Messages[];
-
-  @OneToMany(() => JoinedRoom, (joinedRooms) => joinedRooms.room)
-  joinedRooms: JoinedRoom[];
 }
