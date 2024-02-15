@@ -51,16 +51,31 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   io: Server;
 
   async handleDisconnect(socket: Socket) {
-    await this.connectedService.deleteByIdSocket(socket.id);
-    const accessToken = await this.JWT.signAsync(
-      { sub: 1, username: 'Dzmitry' },
-      {
-        expiresIn: '10m',
-        secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
-      },
-    );
-    socket.emit('refresh', `${accessToken}`);
-    socket.disconnect();
+    try {
+      const refresh_token: string = socket.request.headers.cookie.replace(
+        'refresh_token=',
+        '',
+      );
+
+      const verify: { sub: number; username: string } = await this.JWT.verify(
+        refresh_token,
+        {
+          secret: this.configService.get<string>(`SECRET_REFRESH_KEY`),
+        },
+      );
+
+      const accessToken = await this.JWT.signAsync(
+        { sub: verify.sub, username: verify.username },
+        {
+          expiresIn: '10m',
+          secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
+        },
+      );
+      socket.emit('refresh', `${accessToken}`);
+    } catch (error) {
+      socket.disconnect();
+      return await this.connectedService.deleteByIdSocket(socket.id);
+    }
   }
 
   async handleConnection(client: Socket) {
@@ -86,7 +101,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return this.io.to(client.id).emit('rooms', rooms);
     } catch (error) {
-      console.log(error);
       this.handleDisconnect(client);
     }
   }
