@@ -69,27 +69,16 @@ export class DialoguesService {
     });
 
     const newDialogues = {};
-    const filterDialogues: typeof dialogues = dialogues.filter(
-      ({ targetId, sourceId }) =>
-        !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
-    );
+    const filterDialogues: typeof dialogues = dialogues
+      .filter(
+        ({ targetId, sourceId }) =>
+          !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
+      )
+      .reduce((o, i) => {
+        !o.find((v) => v.sourceId === i.targetId) && o.push(i);
+        return o;
+      }, []);
 
-    /*const arr: typeof dialogues = [];
-    let unique: DialoguesType = filterDialogues[0];
-    for (const i in filterDialogues) {
-      !arr[0] && arr.push(filterDialogues[0]);
-      if (filterDialogues[+i + 1]?.targetId !== unique.sourceId)
-        if (filterDialogues[+i + 1]) {
-          unique = filterDialogues[+i + 1];
-          arr.push(filterDialogues[+i + 1]);
-        }
-    }*/
-
-    const resultFilter: typeof dialogues = filterDialogues.reduce((o, i) => {
-      !o.find((v) => v.sourceId === i.targetId) && o.push(i);
-      return o;
-    }, []);
-
-    return resultFilter;
+    return filterDialogues;
   }
 }
