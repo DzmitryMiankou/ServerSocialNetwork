@@ -69,12 +69,12 @@ export class DialoguesService {
     });
 
     const newDialogues = {};
-    const filterDialogues = dialogues.filter(
+    const filterDialogues: typeof dialogues = dialogues.filter(
       ({ targetId, sourceId }) =>
         !newDialogues[targetId] && (newDialogues[targetId] = sourceId),
     );
 
-    const arr: typeof dialogues = [];
+    /*const arr: typeof dialogues = [];
     let unique: DialoguesType = filterDialogues[0];
     for (const i in filterDialogues) {
       !arr[0] && arr.push(filterDialogues[0]);
@@ -83,7 +83,13 @@ export class DialoguesService {
           unique = filterDialogues[+i + 1];
           arr.push(filterDialogues[+i + 1]);
         }
-    }
-    return arr;
+    }*/
+
+    const resultFilter: typeof dialogues = filterDialogues.reduce((o, i) => {
+      !o.find((v) => v.sourceId === i.targetId) && o.push(i);
+      return o;
+    }, []);
+
+    return resultFilter;
   }
 }

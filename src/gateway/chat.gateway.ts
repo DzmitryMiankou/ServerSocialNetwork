@@ -109,7 +109,6 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
     @MessageBody() room: RoomI,
   ) {
-    console.log(room);
     try {
       const createdRoom: RoomI = await this.roomService.createRoom(room);
       const connections: User[] = await this.connectedService.findByUser(
@@ -135,6 +134,7 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
   ) {
     const response = await this.dialoguesService.getDialogues(id);
+
     socket.emit(PathSocket.dialogues, response);
   }
 
