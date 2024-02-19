@@ -50,7 +50,7 @@ export class User {
     nullable: true,
     default: null,
   })
-  socketId?: string | null;
+  socketId?: string;
 
   @Column({
     type: 'set',

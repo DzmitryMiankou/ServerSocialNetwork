@@ -30,7 +30,7 @@ export class ConnectedService {
         .createQueryBuilder()
         .update(`user`)
         .set({
-          socketId: 'Disconnect',
+          socketId: null,
         })
         .where('socketId = :socketId', { socketId: socketId })
         .execute();
