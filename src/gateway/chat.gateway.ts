@@ -70,7 +70,11 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
           secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
         },
       );
-      socket.emit('refresh', `${accessToken}`);
+      if (verify) {
+        socket.emit('refresh', `${accessToken}`);
+        return await this.connectedService.saveSocketId(socket.id, verify.sub);
+      }
+      socket.disconnect();
     } catch (error) {
       socket.disconnect();
       return await this.connectedService.deleteByIdSocket(socket.id);
