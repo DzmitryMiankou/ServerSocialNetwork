@@ -1,14 +1,7 @@
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 import { Contacts } from 'src/contacts/contacts.entity/contacts.entity';
 import { Messages } from 'src/gateway/entity/messages.entity';
-import { Room } from 'src/gateway/entity/room.entity';
 
 enum UserRole {
   ADMIN = 'admin',
@@ -54,9 +47,10 @@ export class User {
 
   @Column({
     length: 60,
+    nullable: true,
     default: null,
   })
-  socketId: string;
+  socketId?: string | null;
 
   @Column({
     type: 'set',
@@ -64,9 +58,6 @@ export class User {
     default: UserRole.GHOST,
   })
   role: UserRole[];
-
-  @ManyToMany(() => Room, (room) => room.users)
-  rooms: Room[];
 
   @OneToMany(() => Contacts, (photo) => photo.contact)
   contacts: Contacts[];

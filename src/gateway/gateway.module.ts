@@ -5,8 +5,6 @@ import { config } from 'src/config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Messages } from './entity/messages.entity';
 import { User } from 'src/authentication/authentication.entity';
-import { RoomService } from './services/room/room.service';
-import { Room } from './entity/room.entity';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
 import { ConnectedService } from './services/connected/connected.service';
@@ -14,14 +12,8 @@ import { ConnectedService } from './services/connected/connected.service';
 @Module({
   imports: [
     JwtModule.registerAsync({ ...config }),
-    TypeOrmModule.forFeature([Messages, User, Room]),
+    TypeOrmModule.forFeature([Messages, User]),
   ],
-  providers: [
-    Gateway,
-    RoomService,
-    MessagesService,
-    DialoguesService,
-    ConnectedService,
-  ],
+  providers: [Gateway, MessagesService, DialoguesService, ConnectedService],
 })
 export class GatewayModule {}

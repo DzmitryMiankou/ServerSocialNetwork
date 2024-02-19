@@ -18,8 +18,6 @@ import {
   TokenType,
 } from './interfaces/chat.gateway.interface';
 import { User } from 'src/authentication/authentication.entity';
-import { RoomService } from './services/room/room.service';
-import { RoomI } from './interfaces/room.interfaces';
 import { MessagesService } from './services/messages/messages.service';
 import { DialoguesService } from './services/dialogues/dialogues.service';
 import { ConnectedService } from './services/connected/connected.service';
@@ -40,7 +38,6 @@ const enum PathSocket {
 export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private JWT: JwtService,
-    private roomService: RoomService,
     private connectedService: ConnectedService,
     private dialoguesService: DialoguesService,
     private messagesService: MessagesService,
@@ -54,6 +51,8 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(socket: Socket) {
     try {
+      await this.connectedService.deleteByIdSocket(socket.id);
+
       const refresh_token: string = socket.request.headers.cookie.replace(
         'refresh_token=',
         '',
@@ -70,14 +69,15 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
           secret: this.configService.get<string>(`SECRET_ACCESS_KEY`),
         },
       );
+
       if (verify) {
         socket.emit('refresh', `${accessToken}`);
         return await this.connectedService.saveSocketId(socket.id, verify.sub);
       }
-      socket.disconnect();
     } catch (error) {
-      socket.disconnect();
-      return await this.connectedService.deleteByIdSocket(socket.id);
+      console.log(error);
+      await this.connectedService.deleteByIdSocket(socket.id);
+      return socket.disconnect();
     }
   }
 
@@ -95,40 +95,10 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const user = await this.connectedService.findByUser(verify?.sub);
 
-      if (!user) return this.handleDisconnect(client);
+      if (user) return this.handleDisconnect(client);
       await this.connectedService.saveSocketId(client.id, verify.sub);
-      const rooms = await this.roomService.getRoomsForUser(user[0].id, {
-        page: 1,
-        limit: 100,
-      });
-
-      return this.io.to(client.id).emit('rooms', rooms);
     } catch (error) {
       this.handleDisconnect(client);
-    }
-  }
-
-  @SubscribeMessage('createRoom')
-  async onCreateRoom(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() room: RoomI,
-  ) {
-    try {
-      const createdRoom: RoomI = await this.roomService.createRoom(room);
-      const connections: User[] = await this.connectedService.findByUser(
-        createdRoom.users[0].id,
-      );
-
-      const rooms = await this.roomService.getRoomsForUser(
-        createdRoom.users[0].id,
-        {
-          page: 1,
-          limit: 100,
-        },
-      );
-      this.io.to(connections[0].socketId).emit('rooms', rooms);
-    } catch (error) {
-      console.log(error);
     }
   }
 

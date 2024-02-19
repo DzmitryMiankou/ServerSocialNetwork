@@ -11,34 +11,31 @@ export class ConnectedService {
   ) {}
 
   async saveSocketId(socketId: string, userId: number): Promise<void> {
-    await this.userRepositort
-      .createQueryBuilder()
-      .update(`user`)
-      .set({
-        socketId: socketId,
-      })
-      .where('id = :id', { id: userId })
-      .execute();
+    const socketIdUpdata = await this.userRepositort.findOneBy({
+      id: userId,
+    });
+    socketIdUpdata.socketId = socketId;
+    await this.userRepositort.save(socketIdUpdata);
   }
 
   async findByUser(userId: number): Promise<User[]> {
-    try {
-      return await this.userRepositort.find({
-        where: { id: userId },
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    return await this.userRepositort.find({
+      where: { id: userId },
+    });
   }
 
   async deleteByIdSocket(socketId: string): Promise<void> {
-    await this.userRepositort
-      .createQueryBuilder()
-      .update(`user`)
-      .set({
-        socketId: 'Disconnect',
-      })
-      .where('socketId = :socketId', { socketId: socketId })
-      .execute();
+    try {
+      await this.userRepositort
+        .createQueryBuilder()
+        .update(`user`)
+        .set({
+          socketId: 'Disconnect',
+        })
+        .where('socketId = :socketId', { socketId: socketId })
+        .execute();
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

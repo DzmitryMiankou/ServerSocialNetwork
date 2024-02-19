@@ -9,11 +9,10 @@ import { User } from './authentication.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
-import { Room } from 'src/gateway/entity/room.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Login, Room]),
+    TypeOrmModule.forFeature([User, Login]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

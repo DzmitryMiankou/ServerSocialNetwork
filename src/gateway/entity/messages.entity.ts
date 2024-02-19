@@ -7,7 +7,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Room } from './room.entity';
 
 @Entity()
 export class Messages {
@@ -44,8 +43,4 @@ export class Messages {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn()
   source: User;
-
-  @ManyToOne(() => Room, (user) => user.messages)
-  @JoinColumn()
-  room: Room;
 }
