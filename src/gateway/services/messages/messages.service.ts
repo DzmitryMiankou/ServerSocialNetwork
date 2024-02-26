@@ -23,7 +23,9 @@ export class MessagesService {
     return this.fillterMessages(messagesRaw);
   }
 
-  async saveMessage(message: Message): Promise<void> {
+  async saveMessage(
+    message: Pick<Message, 'sourceId' | 'targetId' | 'message'>,
+  ): Promise<void> {
     await this.messagesRepository.save({
       sourceId: message.sourceId,
       targetId: message.targetId,

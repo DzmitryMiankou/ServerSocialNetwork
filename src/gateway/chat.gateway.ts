@@ -144,7 +144,20 @@ export class Gateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() dialogue: { targetId: number; sourceId: number },
     @ConnectedSocket() socket: Socket,
   ) {
+    const us2 = await this.userRepositort.findOne({
+      select: { id: true, socketId: true },
+      where: { id: dialogue.targetId },
+    });
+
+    const mess = {
+      targetId: dialogue.targetId,
+      sourceId: dialogue.sourceId,
+      message: 'Delete messages',
+    };
+    socket.emit('delete_messages', mess);
+    socket.broadcast.to(us2.socketId).emit('delete_messages', mess);
     await this.messagesService.deleteMessage(dialogue);
+    await this.messagesService.saveMessage(mess);
   }
 
   @SubscribeMessage(PathSocket.click)
